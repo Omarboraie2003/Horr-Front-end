@@ -34,8 +34,8 @@ html, body, #root {
 .signup-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 16px 24px;               /* reduced padding */
-  width: 450px;                     /* increased from 400px */
+  padding: 14px 22px;               /* further reduced */
+  width: 450px;
   max-width: calc(100% - 40px);
   max-height: 88vh;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
@@ -50,56 +50,56 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;                         /* minimal gap */
-  margin-bottom: 0px;               /* no margin */
+  gap: 2px;                         /* minimal gap */
+  margin-bottom: 0px;
 }
 
 .logo-text {
-  font-size: 18px;                  /* reduced from 20px */
+  font-size: 16px;                  /* reduced from 18px */
   font-weight: 700;
   margin: 0;
   color: #5a5a5a;
-  letter-spacing: 1.2px;            /* reduced */
+  letter-spacing: 1px;              /* reduced */
 }
 
 .tagline {
   text-align: center;
   color: #bbb;
-  font-size: 7px;                   /* reduced from 8px */
-  letter-spacing: 0.8px;            /* reduced */
-  margin-bottom: 6px;               /* reduced from 8px */
+  font-size: 6px;                   /* reduced from 7px */
+  letter-spacing: 0.6px;            /* reduced */
+  margin-bottom: 5px;               /* reduced from 6px */
   font-weight: 400;
-  line-height: 1;                   /* minimize line height */
+  line-height: 1;
 }
 
 /* user type toggle */
 .user-type-toggle {
   display: flex;
   background: #1a3a4a;
-  border-radius: 6px;               /* reduced from 7px */
-  padding: 2px;                     /* minimal padding */
-  margin-bottom: 8px;               /* reduced from 10px */
-  gap: 2px;                         /* minimal gap */
+  border-radius: 5px;               /* reduced from 6px */
+  padding: 2px;
+  margin-bottom: 7px;               /* reduced from 8px */
+  gap: 2px;
 }
 
 .toggle-btn {
   flex: 1;
-  padding: 6px 10px;                /* reduced from 7px 12px */
+  padding: 5px 9px;                 /* reduced from 6px 10px */
   border: none;
-  border-radius: 4px;               /* reduced from 5px */
+  border-radius: 3px;               /* reduced from 4px */
   cursor: pointer;
-  font-size: 11px;                  /* reduced from 12px */
+  font-size: 10px;                  /* reduced from 11px */
   font-weight: 600;
   background: transparent;
   color: #ffffff;
   transition: all 0.18s ease;
-  line-height: 1;                   /* minimize line height */
+  line-height: 1;
 }
 
 .toggle-btn.active {
   background: #c9a66a;
   color: #1a3a4a;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .toggle-btn:hover {
@@ -110,32 +110,32 @@ html, body, #root {
 .signup-form {
   display: flex;
   flex-direction: column;
-  gap: 5px;                         /* reduced from 7px */
+  gap: 4px;                         /* reduced from 5px */
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 1px;                         /* minimal gap */
+  gap: 1px;
 }
 
 .form-group label {
-  font-size: 9px;                   /* reduced from 10px */
+  font-size: 8px;                   /* reduced from 9px */
   font-weight: 600;
   color: #333;
   text-align: left;
-  line-height: 1;                   /* minimize line height */
+  line-height: 1;
 }
 
 .form-group input {
-  padding: 7px 9px;                 /* reduced from 8px 10px */
+  padding: 6px 8px;                 /* reduced from 7px 9px */
   border: 1px solid #e5e5e5;
-  border-radius: 5px;               /* reduced from 6px */
-  font-size: 10px;                  /* reduced from 11px */
+  border-radius: 4px;               /* reduced from 5px */
+  font-size: 9px;                   /* reduced from 10px */
   background-color: #ffffff;
   color: #333;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  line-height: 1.2;                 /* minimal line height */
+  line-height: 1.2;
 }
 
 .form-group input::placeholder {
@@ -158,10 +158,10 @@ html, body, #root {
 
 .password-input input {
   width: 100%;
-  padding: 7px 36px 7px 9px;        /* reduced */
+  padding: 6px 34px 6px 8px;        /* reduced */
   border: 1px solid #e5e5e5;
-  border-radius: 5px;
-  font-size: 10px;
+  border-radius: 4px;
+  font-size: 9px;
   background-color: #ffffff;
   color: #333;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -181,7 +181,7 @@ html, body, #root {
 
 .toggle-password {
   position: absolute;
-  right: 8px;                       /* reduced from 10px */
+  right: 7px;                       /* reduced from 8px */
   background: none;
   border: none;
   cursor: pointer;
@@ -198,22 +198,22 @@ html, body, #root {
 }
 
 .toggle-password svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;                      /* reduced from 15px */
+  height: 13px;
 }
 
 /* primary action button */
 .submit-btn {
   width: 100%;
-  padding: 8px;                     /* reduced from 9px */
+  padding: 7px;                     /* reduced from 8px */
   background: #1a3a4a;
   color: #ffffff;
   border: none;
-  border-radius: 5px;
-  font-size: 11px;                  /* reduced from 12px */
+  border-radius: 4px;               /* reduced from 5px */
+  font-size: 10px;                  /* reduced from 11px */
   font-weight: 600;
   cursor: pointer;
-  margin-top: 1px;                  /* minimal margin */
+  margin-top: 1px;
   transition: background 0.2s ease, transform 0.1s ease;
   line-height: 1;
 }
@@ -229,8 +229,8 @@ html, body, #root {
 /* helper links / social area */
 .signin-link {
   text-align: center;
-  margin-top: 4px;                  /* reduced from 5px */
-  font-size: 9px;                   /* reduced from 10px */
+  margin-top: 3px;                  /* reduced from 4px */
+  font-size: 8px;                   /* reduced from 9px */
   color: #999;
   line-height: 1;
 }
@@ -250,8 +250,8 @@ html, body, #root {
 .divider {
   display: flex;
   align-items: center;
-  margin: 4px 0;                    /* reduced from 5px */
-  gap: 8px;                         /* reduced from 9px */
+  margin: 3px 0;                    /* reduced from 4px */
+  gap: 8px;
   position: relative;
 }
 
@@ -265,10 +265,10 @@ html, body, #root {
 
 .divider span {
   color: #bbb;
-  font-size: 8px;                   /* reduced from 9px */
+  font-size: 7px;                   /* reduced from 8px */
   white-space: nowrap;
   background: #ffffff;
-  padding: 0 3px;                   /* reduced from 0 4px */
+  padding: 0 2px;                   /* reduced from 0 3px */
   position: relative;
   z-index: 1;
   line-height: 1;
@@ -276,7 +276,7 @@ html, body, #root {
 
 .social-buttons {
   display: flex;
-  gap: 6px;                         /* reduced from 7px */
+  gap: 5px;                         /* reduced from 6px */
 }
 
 .social-btn {
@@ -284,13 +284,13 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;                         /* reduced from 3px */
-  padding: 6px 6px;                 /* reduced from 7px 7px */
+  gap: 2px;
+  padding: 5px 5px;                 /* reduced from 6px 6px */
   border: 1px solid #ddd;
-  border-radius: 8px;               /* reduced from 9px */
+  border-radius: 7px;               /* reduced from 8px */
   background: #ffffff;
   cursor: pointer;
-  font-size: 8px;                   /* reduced from 9px */
+  font-size: 7px;                   /* reduced from 8px */
   font-weight: 500;
   color: #333;
   transition: all 0.2s ease;
@@ -308,15 +308,15 @@ html, body, #root {
 }
 
 .social-btn svg {
-  width: 11px;                      /* reduced from 12px */
-  height: 11px;
+  width: 10px;                      /* reduced from 11px */
+  height: 10px;
 }
 
 /* Responsive tweaks */
 @media (max-width: 600px) {
   .signup-card {
     width: 88%;
-    padding: 14px 18px;
+    padding: 12px 16px;
     border-radius: 14px;
     max-height: 90vh;
   }
