@@ -3,10 +3,13 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import "./SignUp.css"
-import horrLogo from "../assets/horr_sign_in_page.png"
+import backgroundImage from "../assets/BackGround.png"
 
-// PLACEHOLDER: Replace with your logo import
-// import horrLogo from "../assets/your-logo.png";
+const PyramidIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 2L26 24H2L14 2Z" fill="#c9a66a" />
+  </svg>
+)
 
 const SignUp = () => {
   const [userType, setUserType] = useState("freelancer")
@@ -34,8 +37,10 @@ const SignUp = () => {
   return (
     <div className="signup-container">
       <div className="signup-card">
-        {/* PLACEHOLDER: Replace src with your logo path */}
-        <img src={horrLogo} alt="HORR Logo" className="logo" />
+        <div className="logo-container">
+          <PyramidIcon />
+          <h1 className="logo-text">HORR</h1>
+        </div>
         <p className="tagline">HIRE EGYPTIAN TALENT WORLDWIDE.</p>
 
         <div className="user-type-toggle">

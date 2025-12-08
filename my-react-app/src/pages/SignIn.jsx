@@ -1,20 +1,21 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './SignIn.css';
-import horrLogo from "../assets/horr_sign_in_page.png"
 
-const SignIn = () => {
+const PyramidIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 2L26 24H2L14 2Z" fill="#c9a66a" />
+  </svg>
+)
+
+export default function SignIn() {
   const [userType, setUserType] = useState('freelancer');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Sign In Data:', { ...formData, userType });
-  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -23,125 +24,136 @@ const SignIn = () => {
     });
   };
 
-  const handleGoogleSignIn = () => {
-    console.log('Continue with Google clicked');
-  };
-
-  const handleMicrosoftSignIn = () => {
-    console.log('Continue with Microsoft clicked');
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted:', { ...formData, userType });
   };
 
   return (
     <div className="signin-container">
       <div className="signin-card">
-        {/* Logo */}
-        <div className="logo-section">
-          <img 
-            src={horrLogo} 
-            alt="HORR Logo" 
-            className="logo"
-          />
-          <p className="tagline">HIRE EGYPTIAN TALENT WORLDWIDE.</p>
+        <div className="logo-container">
+          <PyramidIcon />
+          <h1 className="logo-text">HORR</h1>
         </div>
+        <p className="tagline">HIRE EGYPTIAN TALENT WORLDWIDE.</p>
 
-        {/* User Type Toggle */}
-        <div className="toggle-container">
+        <div className="user-type-toggle">
           <button
-            onClick={() => setUserType('freelancer')}
             className={`toggle-btn ${userType === 'freelancer' ? 'active' : ''}`}
+            onClick={() => setUserType('freelancer')}
           >
             Freelancer
           </button>
           <button
-            onClick={() => setUserType('client')}
             className={`toggle-btn ${userType === 'client' ? 'active' : ''}`}
+            onClick={() => setUserType('client')}
           >
             Client
           </button>
         </div>
 
-        {/* Form */}
-        <div className="form-container">
-          {/* Email Address */}
-          <div className="input-group">
-            <label className="input-label">Email Address</label>
+        <form onSubmit={handleSubmit} className="signin-form">
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
+              id="email"
               name="email"
               placeholder="Email Address"
               value={formData.email}
               onChange={handleInputChange}
-              className="input-field"
             />
           </div>
 
-          {/* Password */}
-          <div className="input-group">
-            <label className="input-label">Password</label>
-            <div className="password-wrapper">
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <div className="password-input">
               <input
                 type={showPassword ? 'text' : 'password'}
+                id="password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="input-field"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="password-toggle"
-              >
+              <button type="button" className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Sign In Button */}
-          <button onClick={handleSubmit} className="submit-btn">
+          <button type="submit" className="submit-btn">
             Sign In
           </button>
-        </div>
+        </form>
 
-        {/* Sign Up Link */}
-        <p className="signup-text">
-          Don't have an account?{' '}
-          <Link to="/signup" className="signup-link">
-            Sign Up
-          </Link>
+        <p className="signin-link">
+          Don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
 
-        {/* Divider */}
-        <div className="divider">Or continue with</div>
+        <div className="divider">
+          <span>Or continue with</span>
+        </div>
 
-        {/* Social Buttons */}
         <div className="social-buttons">
-          <button onClick={handleGoogleSignIn} className="social-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          <button className="social-btn google">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
             Continue with Google
           </button>
-          <button onClick={handleMicrosoftSignIn} className="social-btn">
-            <svg width="20" height="20" viewBox="0 0 23 23">
-              <path fill="#f3f3f3" d="M0 0h23v23H0z"/>
-              <path fill="#f35325" d="M1 1h10v10H1z"/>
-              <path fill="#81bc06" d="M12 1h10v10H12z"/>
-              <path fill="#05a6f0" d="M1 12h10v10H1z"/>
-              <path fill="#ffba08" d="M12 12h10v10H12z"/>
+          <button className="social-btn microsoft">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+              <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+              <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
+              <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
+              <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
             </svg>
             Continue with Microsoft
           </button>
@@ -149,6 +161,4 @@ const SignIn = () => {
       </div>
     </div>
   );
-};
-
-export default SignIn;
+}
