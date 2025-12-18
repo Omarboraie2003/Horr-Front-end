@@ -1,0 +1,298 @@
+/* Layout reset to prevent default margins/scroll and ensure full-viewport background */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Full-viewport background container - FILLS ENTIRE VIEWPORT */
+.signin-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("../assets/BackGround.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Card sizing and containment - FLOATS ON TOP */
+.signin-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px 40px;
+  width: 460px;
+  max-width: calc(100% - 48px);
+  max-height: 88vh;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid #f5f5f5;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+/* Logo with icon and text */
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.logo-text {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #5a5a5a;
+  letter-spacing: 2px;
+}
+
+.tagline {
+  text-align: center;
+  color: #aaa;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+
+/* user type toggle */
+.user-type-toggle {
+  display: flex;
+  background: transparent;
+  border-radius: 10px;
+  padding: 0;
+  margin-bottom: 18px;
+  gap: 12px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 11px 18px;
+  border: 2px solid #1a3a4a;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  background: #ffffff;
+  color: #1a3a4a;
+  transition: all 0.18s ease;
+}
+
+.toggle-btn.active {
+  background: #1a3a4a;
+  color: #ffffff;
+  border-color: #1a3a4a;
+}
+
+.toggle-btn:hover {
+  opacity: 0.9;
+}
+
+/* form layout and spacing */
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #333;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: #ccc;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #c9a66a;
+  background-color: #ffffff;
+}
+
+/* password input & toggle icon */
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input input {
+  width: 100%;
+  padding: 12px 45px 12px 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #333;
+}
+
+.password-input input::placeholder {
+  color: #ccc;
+}
+
+.password-input input:focus {
+  outline: none;
+  border-color: #c9a66a;
+  background-color: #ffffff;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.toggle-password:hover {
+  color: #888;
+}
+
+/* primary action button */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: #1a3a4a;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #132a35;
+}
+
+/* helper links */
+.signin-link {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #999;
+}
+
+.signin-link a {
+  color: #c9a66a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signin-link a:hover {
+  text-decoration: underline;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 14px 0;
+  gap: 12px;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e8e8e8;
+}
+
+.divider span {
+  color: #aaa;
+  font-size: 13px;
+  white-space: nowrap;
+  background: #ffffff;
+  padding: 0 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.social-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.social-btn:hover {
+  background: #fafafa;
+  border-color: #bbb;
+}
+
+.social-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .signin-card {
+    width: 92%;
+    padding: 28px 24px;
+    border-radius: 16px;
+    max-height: 90vh;
+  }
+
+  .social-buttons {
+    flex-direction: column;
+  }
+}
