@@ -1,0 +1,73 @@
+@import './CertificationModal.css';
+
+.skills-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  min-height: 40px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.skill-tag-modal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #FFF9E6;
+  color: #2c2c2c;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.skill-remove-modal {
+  background: none;
+  border: none;
+  color: #2c2c2c;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.skill-remove-modal:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.skill-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.skill-input-container .form-input {
+  flex: 1;
+}
+
+.btn-add {
+  background-color: #D4AF37;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-add:hover {
+  background-color: #C19B26;
+}
+
+
+

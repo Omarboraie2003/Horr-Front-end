@@ -1,0 +1,56 @@
+.profile-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.profile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.profile-card-header:has(.profile-card-title:empty),
+.profile-card-header:not(:has(.profile-card-title)) {
+  justify-content: flex-end;
+}
+
+.profile-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.profile-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: #666666;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.icon-button:hover {
+  background-color: #f5f5f5;
+  color: #D4AF37;
+}
+
+.profile-card-content {
+  color: #2c2c2c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+

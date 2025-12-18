@@ -1,0 +1,50 @@
+@import './CertificationModal.css';
+
+.languages-list {
+  margin-bottom: 20px;
+}
+
+.language-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #999999;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 8px;
+  transition: color 0.2s;
+}
+
+.remove-btn:hover {
+  color: #2c2c2c;
+}
+
+.btn-add {
+  background-color: #D4AF37;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  align-self: flex-end;
+}
+
+.btn-add:hover {
+  background-color: #C19B26;
+}
+
+
+
