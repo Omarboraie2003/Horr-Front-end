@@ -33,6 +33,7 @@ export default function useAuth() {
     loading, 
     error, 
     isAuthenticated,
+    isInitialized,
     role: user?.role || "client", 
     logout,
     refreshUser 

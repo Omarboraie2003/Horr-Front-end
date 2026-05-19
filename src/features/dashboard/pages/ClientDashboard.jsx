@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { getOnboardingStatus, getClientJobs } from "../../../services/clientService";
 import useAuth from "../../auth/hooks/useAuth";
 import useFetch from "../../../hooks/useFetch";
@@ -21,7 +22,7 @@ function StepCard({ step }) {
             {step.actionLabel}
           </div>
         ) : (
-          <a className="cd-step-link" href={step.actionHref}>{step.actionLabel}</a>
+          <Link className="cd-step-link" to={step.actionHref}>{step.actionLabel}</Link>
         )}
       </div>
       <span className="cd-step-icon" aria-hidden="true">{step.icon}</span>
@@ -48,9 +49,9 @@ function JobCard({ job }) {
         <div>
           <h3 className="cd-job-title">{job.title}</h3>
           <p className="cd-job-meta">Created {dateLabel}</p>
-          <a className="cd-btn-open" href={`/client/manage-job/${job.id}`}>
+          <Link className="cd-btn-open" to={`/client/manage-job/${job.id}`}>
             Open job post ↗
-          </a>
+          </Link>
         </div>
         <button className="cd-job-menu" aria-label="Job options">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -76,12 +77,12 @@ function JobCard({ job }) {
 // ── Post Job Placeholder Card ─────────────────────────────────────────────────
 function PostJobCard() {
   return (
-    <a href="/client/post-job" className="cd-post-job-card">
+    <Link to="/client/post-job" className="cd-post-job-card">
       <div className="cd-post-job-inner">
         <span className="cd-post-job-plus">+</span>
         <span>Post a job</span>
       </div>
-    </a>
+    </Link>
   );
 }
 
