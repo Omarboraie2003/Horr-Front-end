@@ -64,7 +64,7 @@ export default function LoginPage() {
   useEffect(() => {
     // Push a new state to the history
     window.history.pushState(null, null, window.location.href);
-    
+
     const handlePopState = () => {
       // If they try to go back, push them forward again
       window.history.pushState(null, null, window.location.href);
@@ -90,10 +90,10 @@ export default function LoginPage() {
       const response = await login(payload);
       // Backend returns the token directly on success
       localStorage.setItem("token", response);
-      
+
       // Update Redux state immediately
       await dispatch(fetchMe());
-      
+
       navigate("/client/dashboard");
     } catch (err) {
       console.error("Full Login Error:", err);
@@ -117,7 +117,7 @@ export default function LoginPage() {
     <>
       {/* Card */}
       <div className="bg-white rounded-[16px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] w-full max-w-[440px] px-8 sm:px-10 py-10">
-        
+
         {/* Logo Area */}
         <div className="text-center mb-6">
           <img src={logo} alt="Horr Logo" className="h-[100px] mx-auto mb-2 object-contain" />
@@ -130,21 +130,19 @@ export default function LoginPage() {
         <div className="flex gap-3 mb-7">
           <button
             onClick={() => setRole("freelancer")}
-            className={`flex-1 py-2.5 text-[14px] font-semibold rounded-[8px] transition-all duration-300 border ${
-              role === "freelancer"
+            className={`flex-1 py-2.5 text-[14px] font-semibold rounded-[8px] transition-all duration-300 border ${role === "freelancer"
                 ? "bg-[#1a2332] text-[#c4a44a] border-[#c4a44a] shadow-sm"
                 : "bg-white text-[#1a2332] border-[#1a2332] hover:bg-gray-50"
-            }`}
+              }`}
           >
             Freelancer
           </button>
           <button
             onClick={() => setRole("client")}
-            className={`flex-1 py-2.5 text-[14px] font-semibold rounded-[8px] transition-all duration-300 border ${
-              role === "client"
+            className={`flex-1 py-2.5 text-[14px] font-semibold rounded-[8px] transition-all duration-300 border ${role === "client"
                 ? "bg-[#1a2332] text-[#c4a44a] border-[#c4a44a] shadow-sm"
                 : "bg-white text-[#1a2332] border-[#1a2332] hover:bg-gray-50"
-            }`}
+              }`}
           >
             Client
           </button>
@@ -161,56 +159,56 @@ export default function LoginPage() {
             </div>
           )}
 
-        {/* Email */}
-        <div className="mb-[16px]">
-          <label className="block text-[13px] font-semibold text-[#1a2332] mb-[6px] tracking-wide">
-            Email Address
-          </label>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email Address"
-            value={form.email}
-            onChange={handle}
-            className="w-full px-4 py-[10px] rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[14px] placeholder-gray-400 outline-none focus:border-[#a8853a] focus:ring-1 focus:ring-[#a8853a] transition-all"
-          />
-        </div>
-
-        {/* Password */}
-        <div className="mb-[16px]">
-          <label className="block text-[13px] font-semibold text-[#1a2332] mb-[6px] tracking-wide">
-            Password
-          </label>
-          <div className="relative">
+          {/* Email */}
+          <div className="mb-[16px]">
+            <label className="block text-[13px] font-semibold text-[#1a2332] mb-[6px] tracking-wide">
+              Email Address
+            </label>
             <input
-              name="password"
-              type={showPass ? "text" : "password"}
-              placeholder="Password"
-              value={form.password}
+              name="email"
+              type="email"
+              placeholder="Email Address"
+              value={form.email}
               onChange={handle}
-              className="w-full px-4 py-[10px] pr-11 rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[14px] placeholder-gray-400 outline-none focus:border-[#a8853a] focus:ring-1 focus:ring-[#a8853a] transition-all"
+              className="w-full px-4 py-[10px] rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[14px] placeholder-gray-400 outline-none focus:border-[#a8853a] focus:ring-1 focus:ring-[#a8853a] transition-all"
             />
-            <button
-              type="button"
-              onClick={() => setShowPass((p) => !p)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#a8853a] transition-colors"
-            >
-              <EyeIcon visible={showPass} />
-            </button>
           </div>
-        </div>
 
-        {/* Forgot Password Link */}
-        <div className="flex justify-end mb-[22px]">
-           <a href="#" className="text-[12px] text-[#a8853a] font-semibold hover:underline transition-colors">
-             Forgot Password?
-           </a>
-        </div>
+          {/* Password */}
+          <div className="mb-[16px]">
+            <label className="block text-[13px] font-semibold text-[#1a2332] mb-[6px] tracking-wide">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                name="password"
+                type={showPass ? "text" : "password"}
+                placeholder="Password"
+                value={form.password}
+                onChange={handle}
+                className="w-full px-4 py-[10px] pr-11 rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[14px] placeholder-gray-400 outline-none focus:border-[#a8853a] focus:ring-1 focus:ring-[#a8853a] transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass((p) => !p)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#a8853a] transition-colors"
+              >
+                <EyeIcon visible={showPass} />
+              </button>
+            </div>
+          </div>
 
-        {/* Sign In Button */}
-        <button type="submit" disabled={isLoading} className="w-full py-[12px] rounded-[8px] bg-[#1a2332] hover:bg-[#243048] text-white text-[15px] font-semibold tracking-wide shadow-md hover:shadow-lg hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed">
-          {isLoading ? "Signing In..." : "Sign In"}
-        </button>
+          {/* Forgot Password Link */}
+          <div className="flex justify-end mb-[22px]">
+            <a href="#" className="text-[12px] text-[#a8853a] font-semibold hover:underline transition-colors">
+              Forgot Password?
+            </a>
+          </div>
+
+          {/* Sign In Button */}
+          <button type="submit" disabled={isLoading} className="w-full py-[12px] rounded-[8px] bg-[#1a2332] hover:bg-[#243048] text-white text-[15px] font-semibold tracking-wide shadow-md hover:shadow-lg hover:-translate-y-[1px] active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed">
+            {isLoading ? "Signing In..." : "Sign In"}
+          </button>
         </form>
 
         {/* Sign Up Link */}

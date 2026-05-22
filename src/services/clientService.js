@@ -23,6 +23,11 @@ export const getUserProfile = async () => {
   return response.data?.data || response.data;
 };
 
+export const getUserPaymentMethods = async () => {
+  const response = await apiClient.get(ENDPOINTS.USER_PROFILE.BASE);
+  return response.data?.data?.paymentMethods || [];
+};
+
 export const updateName = async (name) => {
   // The API expects a raw string in the body for these patch endpoints
   const response = await apiClient.patch(ENDPOINTS.USER_PROFILE.UPDATE_NAME, JSON.stringify(name), {
@@ -61,6 +66,11 @@ export const getWalletBalance = async () => {
 
 export const addPaymentMethod = async (paymentData) => {
   const response = await apiClient.post(ENDPOINTS.USER_PROFILE.PAYMENT_METHOD, paymentData);
+  return response.data;
+};
+
+export const deletePaymentMethod = async (methodId) => {
+  const response = await apiClient.delete(ENDPOINTS.USER_PROFILE.PAYMENT_METHOD_DELETE(methodId));
   return response.data;
 };
 

@@ -31,7 +31,7 @@ const MyInfoSection = () => {
   const displayFirstName = profile.firstName || '';
   const displayLastName = profile.lastName || '';
   const displayEmail = profile.email || 'Not Provided';
-  const displayUserName = profile.userName || `${displayFirstName} ${displayLastName}`.trim() || 'N/A';
+  const displayUserName = profile.fullName || `${displayFirstName} ${displayLastName}`.trim() || 'N/A';
 
   useEffect(() => {
     if (profile) {
