@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod } from '../../../services/clientService';
+import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod, updatePaymentMethod } from '../../../services/clientService';
 import useFetch from '../../../hooks/useFetch';
 import { toast } from 'sonner';
 
@@ -54,6 +54,9 @@ const BillingSection = () => {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editIdentifier, setEditIdentifier] = useState('');
+  const [updating, setUpdating] = useState(false);
 
   const handleAddMethod = async () => {
     if (!identifier.trim()) {
@@ -91,6 +94,27 @@ const BillingSection = () => {
       setDeletingId(null);
     }
   };
+  const handleUpdateMethod = async (methodId, type) => {
+    if (!editIdentifier.trim()) {
+      toast.error('Please enter an account identifier.');
+      return;
+    }
+    setUpdating(true);
+    try {
+      const payload = {
+        methodName: type === 'insta' ? 'InstaPay' : 'E-Wallet',
+        accountIdentifier: editIdentifier
+      };
+      await updatePaymentMethod(methodId, payload);
+      toast.success('Billing method updated successfully!');
+      await Promise.all([refreshPaymentMethods(), refreshOnboarding()]);
+      setEditingId(null);
+    } catch (err) {
+      toast.error('Failed to update billing method');
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   return (
     <div id="billing" className="animate-in fade-in duration-500">
@@ -122,8 +146,10 @@ const BillingSection = () => {
                 {paymentMethods.map((method) => {
                   const type = getMethodType(method.methodName);
                   const isInsta = type === 'insta';
+                  const isEditing = editingId === method.id;
+
                   return (
-                    <div key={method.id} className="group bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+                    <div key={method.id} className={`group bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-sm transition duration-300 hover:shadow-lg ${isEditing ? 'ring-2 ring-amber-500' : 'hover:-translate-y-0.5'}`}>
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
                           <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -138,19 +164,65 @@ const BillingSection = () => {
                           <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${isInsta ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
                             {isInsta ? 'InstaPay' : 'E-Wallet'}
                           </span>
-                          <button
-                            onClick={() => {
-                              setDeletingId(method.id);
-                              setShowDeleteConfirm(true);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-lg"
-                            title="Remove payment method"
-                          >
-                            ✕
-                          </button>
+                          {!isEditing && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditingId(method.id);
+                                  setEditIdentifier(method.accountIdentifier);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-gray-400 hover:text-amber-600 p-1.5 hover:bg-amber-50 rounded-lg"
+                                title="Edit payment method"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setDeletingId(method.id);
+                                  setShowDeleteConfirm(true);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-gray-400 hover:text-red-500 p-1.5 hover:bg-red-50 rounded-lg"
+                                title="Remove payment method"
+                              >
+                                ✕
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
-                      <p className="mt-4 text-sm text-gray-600">{formatAccountIdentifier(method.accountIdentifier)}</p>
+                      
+                      {isEditing ? (
+                        <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <input 
+                              type="text" 
+                              className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl bg-white text-gray-900 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-100 outline-none transition-all" 
+                              value={editIdentifier}
+                              onChange={e => setEditIdentifier(e.target.value)}
+                              placeholder={isInsta ? "username@instapay or 01xxxxxxxxx" : "10xxxxxxxxx"}
+                              autoFocus
+                            />
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => handleUpdateMethod(method.id, type)}
+                                disabled={updating}
+                                className="px-5 py-2.5 bg-amber-600 text-white text-sm font-bold rounded-xl hover:bg-amber-700 disabled:opacity-50 transition-colors shadow-sm"
+                              >
+                                {updating ? 'Saving...' : 'Save'}
+                              </button>
+                              <button 
+                                onClick={() => setEditingId(null)}
+                                disabled={updating}
+                                className="px-5 py-2.5 bg-gray-200 text-gray-800 text-sm font-bold rounded-xl hover:bg-gray-300 disabled:opacity-50 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mt-4 text-sm text-gray-600">{formatAccountIdentifier(method.accountIdentifier)}</p>
+                      )}
                     </div>
                   );
                 })}
