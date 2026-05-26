@@ -5,14 +5,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 function getInitials(user) {
   if (!user) return "?";
   const f = (user.firstName || "")[0] || "";
-  const l = (user.lastName  || "")[0] || "";
+  const l = (user.lastName || "")[0] || "";
   return (f + l).toUpperCase();
 }
 
 export default function Navbar({ role = "client", user = null }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchValue,  setSearchValue]  = useState("");
-  
+  const [searchValue, setSearchValue] = useState("");
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -109,12 +109,12 @@ export default function Navbar({ role = "client", user = null }) {
         /* ── Dropdown ────────────────────────────────────────────────────── */
         .horr-dropdown {
           position: absolute;
-          top: calc(100% + 8px);
+          top: 100%;
           left: 0;
+          padding: 8px 0.5rem 0.5rem;
           background: #fff;
-          border: 1px solid #e0e0e0;
+          border: 1px solid #e0e0e0; 
           border-radius: 12px;
-          padding: 0.5rem;
           min-width: 250px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.11);
           opacity: 0;
