@@ -27,6 +27,8 @@ export const ENDPOINTS = {
   JOBS: {
     CREATE: '/Jobs/create-job',
     LIST: '/Jobs/jobs',
+    UPDATE: '/Jobs/update-job',
+    DELETE: '/Jobs/delete-job',
   },
   CATEGORIES: '/Categories',
   SKILLS: '/Skills',

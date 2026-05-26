@@ -11,8 +11,20 @@ export const getOnboardingStatus = async () => {
   return response.data;
 };
 
+// Jobs
+
 export const getClientJobs = async () => {
   const response = await apiClient.get(ENDPOINTS.CLIENT.JOBS);
+  return response.data;
+};
+
+export const updateJob = async (jobId, jobData) => {
+  const response = await apiClient.put(`${ENDPOINTS.JOBS.UPDATE}/${jobId}`, jobData);
+  return response.data;
+};
+
+export const deleteJob = async (jobId) => {
+  const response = await apiClient.delete(`${ENDPOINTS.JOBS.DELETE}/${jobId}`);
   return response.data;
 };
 
