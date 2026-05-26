@@ -13,7 +13,7 @@ function StepCard({ step }) {
         <p className="cd-step-required">{step.requiredLabel}</p>
         {step.done ? (
           <div className="cd-step-verified">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
               <polyline points="20 6 9 17 4 12" />
             </svg>
             {step.actionLabel}
@@ -22,7 +22,9 @@ function StepCard({ step }) {
           <Link className="cd-step-link" to={step.actionHref}>{step.actionLabel}</Link>
         )}
       </div>
-      <div className="cd-step-icon">{step.icon}</div>
+      <div className="cd-step-icon" style={{ color: step.done ? "var(--cd-success)" : "var(--cd-gold)" }}>
+        {step.icon}
+      </div>
     </div>
   );
 }
@@ -48,8 +50,8 @@ function JobMenu({ onEdit, onDelete }) {
         onClick={() => setOpen((p) => !p)}
       >
         <svg width="4" height="16" viewBox="0 0 4 18" fill="currentColor">
-          <circle cx="2" cy="2"  r="2" />
-          <circle cx="2" cy="9"  r="2" />
+          <circle cx="2" cy="2" r="2" />
+          <circle cx="2" cy="9" r="2" />
           <circle cx="2" cy="16" r="2" />
         </svg>
       </button>
@@ -57,17 +59,17 @@ function JobMenu({ onEdit, onDelete }) {
         <div className="cd-dropdown">
           <button className="cd-dropdown-item" onClick={() => { setOpen(false); onEdit(); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
             Edit
           </button>
           <button className="cd-dropdown-item is-danger" onClick={() => { setOpen(false); onDelete(); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-              <path d="M10 11v6M14 11v6"/>
-              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
             </svg>
             Delete
           </button>
@@ -120,7 +122,7 @@ function EditJobModal({ job, onClose, onSaved }) {
           <h2 className="cd-modal-title">Edit Job Post</h2>
           <button className="cd-modal-close" onClick={onClose} aria-label="Close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
@@ -202,17 +204,17 @@ function DeleteConfirmModal({ job, onClose, onDeleted }) {
           <h2 className="cd-modal-title">Delete Job</h2>
           <button className="cd-modal-close" onClick={onClose} aria-label="Close">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
         <div className="cd-modal-body">
           <div className="cd-delete-icon-wrap">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c00" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-              <path d="M10 11v6M14 11v6"/>
-              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
             </svg>
           </div>
           <p className="cd-confirm-text">
@@ -240,10 +242,10 @@ function JobCard({ job, onEdit, onDelete }) {
     : "Unknown date";
 
   const statItems = [
-    { key: "Invited",   val: job.stats?.invitationsCount ?? 0 },
-    { key: "Proposals", val: job.stats?.proposalsCount   ?? 0 },
-    { key: "Messaged",  val: job.stats?.messagedCount    ?? 0 },
-    { key: "Hired",     val: job.stats?.hiredCount       ?? 0 },
+    { key: "Invited", val: job.stats?.invitationsCount ?? 0 },
+    { key: "Proposals", val: job.stats?.proposalsCount ?? 0 },
+    { key: "Messaged", val: job.stats?.messagedCount ?? 0 },
+    { key: "Hired", val: job.stats?.hiredCount ?? 0 },
   ];
 
   return (
@@ -295,34 +297,68 @@ function Skeleton({ height = 120, width = "100%", radius = 10 }) {
 
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function ClientDashboard() {
-  const [view, setView]           = useState("grid");
-  const [editingJob, setEditingJob]   = useState(null);
+  const [view, setView] = useState("grid");
+  const [editingJob, setEditingJob] = useState(null);
   const [deletingJob, setDeletingJob] = useState(null);
-  const [jobs, setJobs]           = useState([]);
+  const [jobs, setJobs] = useState([]);
 
   const { user, loading: authLoading } = useAuth();
 
-  const { data: steps,    loading: stepsLoading,  error: stepsError  } = useFetch(getOnboardingStatus);
-  const { data: jobsData, loading: jobsLoading,   error: jobsError   } = useFetch(getClientJobs);
+  const { data: steps, loading: stepsLoading, error: stepsError } = useFetch(getOnboardingStatus);
+  const { data: jobsData, loading: jobsLoading, error: jobsError } = useFetch(getClientJobs);
 
   useEffect(() => {
     if (jobsData) setJobs(jobsData);
   }, [jobsData]);
 
   const loading = authLoading || stepsLoading || jobsLoading;
-  const error   = stepsError  || jobsError;
+  const error = stepsError || jobsError;
 
-  const handleJobSaved   = (updated) => setJobs((p) => p.map((j) => j.id === updated?.id ? { ...j, ...updated } : j));
-  const handleJobDeleted = (id)      => setJobs((p) => p.filter((j) => j.id !== id));
+  const handleJobSaved = (updated) => setJobs((p) => p.map((j) => j.id === updated?.id ? { ...j, ...updated } : j));
+  const handleJobDeleted = (id) => setJobs((p) => p.filter((j) => j.id !== id));
 
   const stepCards = steps
     ? [
-        { id: "billing", requiredLabel: "Required to hire",        actionLabel: "Add a billing method",  actionHref: "/client/settings#billing", done: steps.billingAdded,  icon: "💳" },
-        { id: "email",   requiredLabel: "Required to hire",        actionLabel: "Email address verified", actionHref: "#",                        done: steps.emailVerified, icon: "✉️" },
-        { id: "phone",   requiredLabel: "Required to publish a job",actionLabel: "Phone number verified", actionHref: "#",                        done: steps.phoneVerified, icon: "📱" },
-      ]
+      {
+        id: "billing",
+        requiredLabel: "Required to hire",
+        actionLabel: "Add a billing method",
+        actionHref: "/client/settings#billing",
+        done: steps.billingAdded,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+        ),
+      },
+      {
+        id: "email",
+        requiredLabel: "Required to hire",
+        actionLabel: "Email address verified",
+        actionHref: "#",
+        done: steps.emailVerified,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+        ),
+      },
+      {
+        id: "phone",
+        requiredLabel: "Required to publish a job",
+        actionLabel: "Phone number verified",
+        actionHref: "#",
+        done: steps.phoneVerified,
+        icon: (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.69a16 16 0 0 0 6.29 6.29l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+        ),
+      },
+    ]
     : null;
-
   return (
     <>
       <style>{`
@@ -896,7 +932,7 @@ export default function ClientDashboard() {
 
         {error && (
           <div className="cd-error">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
             Could not load your dashboard: {error}
           </div>
         )}
@@ -906,13 +942,13 @@ export default function ClientDashboard() {
             {loading
               ? [1, 2, 3].map((i) => <Skeleton key={i} height={200} radius={12} />)
               : jobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    onEdit={setEditingJob}
-                    onDelete={setDeletingJob}
-                  />
-                ))
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  onEdit={setEditingJob}
+                  onDelete={setDeletingJob}
+                />
+              ))
             }
             {!loading && <PostJobCard />}
           </div>
