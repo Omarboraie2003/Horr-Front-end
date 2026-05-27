@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../features/auth/authSlice';
+import talentReducer from '../features/talent/talentSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    // Add other slices here as they are developed
+    talent: talentReducer,
   },
 });
 

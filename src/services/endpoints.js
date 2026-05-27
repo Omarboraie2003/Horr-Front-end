@@ -30,6 +30,13 @@ export const ENDPOINTS = {
     UPDATE: '/Jobs/update-job',
     DELETE: '/Jobs/delete-job',
   },
+  
   CATEGORIES: '/Categories',
   SKILLS: '/Skills',
+
+  TALENT: {
+  searchFreelancers: 'client/freelancers/search',
+  }
+
+
 };

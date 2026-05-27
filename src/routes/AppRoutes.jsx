@@ -7,6 +7,7 @@ import LoginPage from '../features/auth/pages/LoginPage';
 import ClientDashboard from '../features/dashboard/pages/ClientDashboard';
 import { PostJobPage } from '../features/jobs';
 import SettingsPage from '../features/account/pages/SettingsPage';
+import SearchTalentPage from '../features/talent/SearchTalentPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 
 const AppRoutes = () => {
@@ -23,6 +24,7 @@ const AppRoutes = () => {
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/client/post-job" element={<PostJobPage />} />
           <Route path="/client/settings" element={<SettingsPage />} />
+          <Route path="/client/SearchTalentPage" element={<SearchTalentPage />} />
         </Route>
       </Route>
 

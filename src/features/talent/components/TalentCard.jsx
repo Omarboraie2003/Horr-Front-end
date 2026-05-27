@@ -1,35 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TalentBadge from "./TalentBadge";
 import SkillTags from "./SkillTags";
 
 /**
  * TalentCard
- * Displays a single freelancer's profile card.
+ * Displays a single freelancer's profile card with horizontal layout.
  *
  * Props:
  *   talent: {
- *     id:           string
- *     initials:     string           — e.g. "JD"
- *     avatarColor:  string           — hex background for initials avatar
- *     avatarUrl:    string | null    — if set, shows image instead of initials
- *     name:         string
- *     isVerified:   boolean
- *     badge:        "top-rated" | "rising-talent" | null
- *     title:        string           — e.g. "Senior Fullstack Developer"
- *     trustScore:   number           — e.g. 98.5
- *     rating:       number           — e.g. 4.9
- *     ratingCount:  number           — e.g. 14
- *     hourlyRate:   number           — e.g. 75
- *     bio:          string
- *     skills:       Array<{ name: string, level: "Exp"|"Int"|"Beg"|null }>
- *     availability: "Full-time" | "Part-time" | "Not available"
- *     isOnline:     boolean
- *     profileUrl:   string           — route to profile page
+ *     id:              string
+ *     initials:        string           — e.g. "FF"
+ *     avatarColor:     string           — hex background for initials avatar
+ *     avatarUrl:       string | null    — if set, shows image instead of initials
+ *     name:            string
+ *     isVerified:      boolean
+ *     badge:           "top-rated" | "rising-talent" | null
+ *     title:           string           — e.g. "Children's book illustrator"
+ *     jobSuccess:      number           — e.g. 90 (percentage)
+ *     rating:          number           — e.g. 4.9
+ *     ratingCount:     number           — e.g. 14
+ *     hourlyRate:      number           — e.g. 75
+ *     bio:             string
+ *     skills:          Array<{ name: string, level: "Exp"|"Int"|"Beg"|null }>
+ *     availability:    "Full-time" | "Part-time" | "Not available"
+ *     isOnline:        boolean
+ *     profileUrl:      string           — route to profile page
  *   }
- *   onInvite:  (talentId) => void    — called when "Invite to Job" is clicked
+ *   onInvite:     (talentId) => void    — called when "Invite to Job" is clicked
+ *   onBookmark:   (talentId, isSaved) => void — called when bookmark button is clicked
  */
-export default function TalentCard({ talent = {}, onInvite }) {
-    const [bookmarked, setBookmarked] = useState(false);
+export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
+  const [bookmarked, setBookmarked] = useState(talent.isSaved ?? false);
+
+  // Keep local bookmarked state in sync with prop changes
+  useEffect(() => {
+    setBookmarked(talent.isSaved ?? false);
+  }, [talent.isSaved]);
 
     const {
         id,
@@ -40,10 +46,10 @@ export default function TalentCard({ talent = {}, onInvite }) {
         isVerified = false,
         badge = null,
         title = "—",
-        trustScore = null,
+        jobSuccess = null,
+        earned = null,
         rating = null,
         ratingCount = null,
-        hourlyRate = null,
         bio = "",
         skills = [],
         availability = null,
@@ -51,12 +57,10 @@ export default function TalentCard({ talent = {}, onInvite }) {
         profileUrl = "#",
     } = talent;
 
-    const availabilityColors = {
-        "Full-time": { color: "#2e7d32", bg: "#f0faf0" },
-        "Part-time": { color: "#7a5c1e", bg: "#fdf8ee" },
-        "Not available": { color: "#9a9590", bg: "#f4f4f4" },
+    const formatEarned = (val) => {
+        if (val >= 1000) return `$${(val / 1000).toFixed(0)}k+`;
+        return `$${val}`;
     };
-    const availStyle = availability ? availabilityColors[availability] : null;
 
     return (
         <>
@@ -66,83 +70,96 @@ export default function TalentCard({ talent = {}, onInvite }) {
           border: 1px solid #e6e4df;
           border-radius: 12px;
           padding: 1.5rem;
-          transition: box-shadow 0.2s, transform 0.18s;
+          transition: box-shadow 0.2s;
           font-family: 'DM Sans', system-ui, sans-serif;
           color: #1c1a17;
         }
         .tc-card:hover {
-          box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-          transform: translateY(-2px);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
-        /* ── Top row ── */
-        .tc-top {
+        /* ── Main container ── */
+        .tc-container {
           display: flex;
           align-items: flex-start;
-          gap: 1rem;
-          margin-bottom: 1.1rem;
+          gap: 1.25rem;
+          margin-bottom: 1rem;
+        }
+
+        /* ── Avatar + online indicator ── */
+        .tc-avatar-wrap {
+          position: relative;
+          flex-shrink: 0;
         }
 
         .tc-avatar {
-          width: 48px;
-          height: 48px;
-          border-radius: 10px;
+          width: 64px;
+          height: 64px;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 0.88rem;
+          font-size: 1.1rem;
           font-weight: 700;
           color: #fff;
-          flex-shrink: 0;
           letter-spacing: 0.04em;
           overflow: hidden;
         }
         .tc-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-        .tc-info { flex: 1; min-width: 0; }
+        .tc-online-indicator {
+          position: absolute;
+          bottom: -4px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          border: 2px solid #fff;
+          background: #C9A84C;
+        }
+        .tc-online-indicator.offline {
+          background: #ccc;
+        }
+
+        /* ── Main info section ── */
+        .tc-info {
+          flex: 1;
+          min-width: 0;
+        }
 
         .tc-name-row {
           display: flex;
           align-items: center;
           flex-wrap: wrap;
           gap: 0.4rem;
-          margin-bottom: 0.2rem;
+          margin-bottom: 0.25rem;
         }
         .tc-name {
-          font-size: 1rem;
+          font-size: 1.1rem;
           font-weight: 700;
           color: #1c1a17;
         }
 
         .tc-title {
-          font-size: 0.85rem;
+          font-size: 0.9rem;
           color: #9a9590;
-          line-height: 1.5;
-          margin-bottom: 0.5rem;
+          line-height: 1.4;
+          margin-bottom: 0.6rem;
         }
 
-        .tc-online-row {
-          display: flex;
-          align-items: center;
-          gap: 0.35rem;
-          font-size: 0.78rem;
-          color: #9a9590;
+        .tc-earned {
+          font-size: 0.85rem;
+          color: #C9A84C;
+          font-weight: 600;
         }
-        .tc-dot {
-          width: 7px;
-          height: 7px;
-          border-radius: 50%;
-          flex-shrink: 0;
-        }
-        .tc-dot.online  { background: #43a047; }
-        .tc-dot.offline { background: #ccc; }
 
         /* ── Right actions ── */
         .tc-actions {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
-          gap: 0.5rem;
+          gap: 0.6rem;
           flex-shrink: 0;
         }
 
@@ -151,27 +168,26 @@ export default function TalentCard({ talent = {}, onInvite }) {
           border: none;
           cursor: pointer;
           color: #ccc;
-          padding: 0.2rem;
+          padding: 0.4rem;
           display: flex;
           align-items: center;
-          border-radius: 6px;
+          border-radius: 50%;
           transition: color 0.15s, background 0.15s;
         }
         .tc-bookmark-btn:hover { color: #e57373; background: #fff5f5; }
         .tc-bookmark-btn.active { color: #e57373; }
 
         .tc-invite-btn {
-          background: linear-gradient(135deg, #C9A84C, #E5C97A);
+          background: #C9A84C;
           color: #fff;
           border: none;
-          border-radius: 8px;
-          padding: 0.5rem 1rem;
-          font-size: 0.8rem;
+          border-radius: 20px;
+          padding: 0.6rem 1.4rem;
+          font-size: 0.85rem;
           font-weight: 600;
           cursor: pointer;
           font-family: inherit;
           white-space: nowrap;
-          box-shadow: 0 2px 8px rgba(201,168,76,0.25);
           transition: opacity 0.15s, transform 0.15s;
         }
         .tc-invite-btn:hover { opacity: 0.88; transform: translateY(-1px); }
@@ -180,47 +196,43 @@ export default function TalentCard({ talent = {}, onInvite }) {
         .tc-stats {
           display: flex;
           align-items: center;
-          gap: 1.5rem;
-          padding: 0.9rem 0;
-          border-top: 1px solid #e6e4df;
-          border-bottom: 1px solid #e6e4df;
-          margin-bottom: 1rem;
+          gap: 2rem;
+          padding: 0.8rem 0;
           flex-wrap: wrap;
         }
-        .tc-stat { display: flex; flex-direction: column; gap: 0.12rem; }
+        .tc-stat {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+        }
         .tc-stat-val {
-          font-size: 0.95rem;
+          font-size: 1rem;
           font-weight: 700;
           color: #1c1a17;
         }
         .tc-stat-key {
-          font-size: 0.62rem;
+          font-size: 0.65rem;
           color: #9a9590;
           text-transform: uppercase;
-          letter-spacing: 0.07em;
-          font-weight: 500;
+          letter-spacing: 0.08em;
+          font-weight: 600;
         }
 
         .tc-rating-stars {
           display: flex;
           align-items: center;
-          gap: 0.2rem;
-          font-size: 0.95rem;
-          font-weight: 700;
+          gap: 0.25rem;
           color: #1c1a17;
+          font-weight: 700;
         }
         .tc-star { color: #C9A84C; }
-        .tc-rating-count {
-          font-size: 0.78rem;
-          color: #9a9590;
-          font-weight: 400;
-        }
+        .tc-rating-count { font-size: 0.78rem; color: #9a9590; font-weight: 400; }
 
         /* ── Bio ── */
         .tc-bio {
           font-size: 0.85rem;
           color: #9a9590;
-          line-height: 1.6;
+          line-height: 1.5;
           margin-bottom: 1rem;
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -233,19 +245,15 @@ export default function TalentCard({ talent = {}, onInvite }) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-top: 1rem;
+          margin-top: 0.8rem;
           flex-wrap: wrap;
-          gap: 0.5rem;
+          gap: 0.75rem;
         }
 
         .tc-availability {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3rem;
-          border-radius: 6px;
-          padding: 0.28rem 0.65rem;
-          font-size: 0.78rem;
+          font-size: 0.82rem;
           font-weight: 600;
+          color: #9a9590;
         }
 
         .tc-view-btn {
@@ -264,19 +272,39 @@ export default function TalentCard({ talent = {}, onInvite }) {
           text-decoration: none;
         }
         .tc-view-btn:hover { opacity: 0.75; }
+
+        @media (max-width: 768px) {
+          .tc-container {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .tc-actions {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.8rem;
+            width: 100%;
+            justify-content: space-between;
+          }
+          .tc-invite-btn {
+            width: auto;
+          }
+        }
       `}</style>
 
             <div className="tc-card">
 
-                {/* Top row */}
-                <div className="tc-top">
+                {/* Main container */}
+                <div className="tc-container">
 
-                    {/* Avatar */}
-                    <div className="tc-avatar" style={{ background: avatarColor }}>
-                        {avatarUrl
-                            ? <img src={avatarUrl} alt={name} />
-                            : initials
-                        }
+                    {/* Avatar + online indicator */}
+                    <div className="tc-avatar-wrap">
+                        <div className="tc-avatar" style={{ background: avatarColor }}>
+                            {avatarUrl
+                                ? <img src={avatarUrl} alt={name} />
+                                : initials
+                            }
+                        </div>
+                        <div className={`tc-online-indicator ${isOnline ? "" : "offline"}`} />
                     </div>
 
                     {/* Info */}
@@ -287,20 +315,21 @@ export default function TalentCard({ talent = {}, onInvite }) {
                             {badge && <TalentBadge type={badge} />}
                         </div>
                         <p className="tc-title">{title}</p>
-                        <div className="tc-online-row">
-                            <span className={`tc-dot ${isOnline ? "online" : "offline"}`} />
-                            <span>{isOnline ? "Online" : "Offline"}</span>
-                        </div>
+                        {earned !== null && <p className="tc-earned">${formatEarned(earned)} earned</p>}
                     </div>
 
                     {/* Bookmark + Invite */}
                     <div className="tc-actions">
                         <button
-                            className={`tc-bookmark-btn ${bookmarked ? "active" : ""}`}
-                            onClick={() => setBookmarked((p) => !p)}
-                            aria-label="Bookmark freelancer"
+                          className={`tc-bookmark-btn ${bookmarked ? "active" : ""}`}
+                          onClick={() => {
+                            const prev = bookmarked;
+                            setBookmarked(!prev);
+                            onBookmark?.(id, prev);
+                          }}
+                          aria-label="Bookmark freelancer"
                         >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill={bookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill={bookmarked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                             </svg>
                         </button>
@@ -312,30 +341,38 @@ export default function TalentCard({ talent = {}, onInvite }) {
 
                 {/* Stats */}
                 <div className="tc-stats">
-                    {trustScore !== null && (
-                        <div className="tc-stat">
-                            <span className="tc-stat-val">{trustScore}%</span>
-                            <span className="tc-stat-key">Trust Score</span>
-                        </div>
-                    )}
-                    {rating !== null && (
-                        <div className="tc-stat">
-                            <div className="tc-rating-stars">
-                                <span className="tc-star">★</span>
-                                {rating}
-                                {ratingCount !== null && (
-                                    <span className="tc-rating-count">({ratingCount})</span>
-                                )}
-                            </div>
-                            <span className="tc-stat-key">Rating</span>
-                        </div>
-                    )}
-                    {hourlyRate !== null && (
-                        <div className="tc-stat">
-                            <span className="tc-stat-val">${hourlyRate}.00 / hr</span>
-                            <span className="tc-stat-key">Rate</span>
-                        </div>
-                    )}
+                  {jobSuccess !== null && (
+                    <div className="tc-stat">
+                      <span className="tc-stat-val">{jobSuccess}%</span>
+                      <span className="tc-stat-key">Job Success</span>
+                    </div>
+                  )}
+
+                  {rating !== null && (
+                    <div className="tc-stat">
+                      <div className="tc-rating-stars">
+                        <span className="tc-star">★</span>
+                        <span>{Number(rating).toFixed(1)}</span>
+                        {ratingCount !== null && (
+                          <span className="tc-rating-count">({ratingCount})</span>
+                        )}
+                      </div>
+                      <span className="tc-stat-key">Rating</span>
+                    </div>
+                  )}
+
+                  {hourlyRate !== null && (
+                    <div className="tc-stat">
+                      <span className="tc-stat-val">${Number(hourlyRate).toFixed(2)} / hr</span>
+                      <span className="tc-stat-key">Rate</span>
+                    </div>
+                  )}
+
+                  {badge && (
+                    <div className="tc-stat">
+                      <TalentBadge type={badge} />
+                    </div>
+                  )}
                 </div>
 
                 {/* Bio */}
@@ -346,16 +383,9 @@ export default function TalentCard({ talent = {}, onInvite }) {
 
                 {/* Footer */}
                 <div className="tc-footer">
-                    {availability && availStyle && (
-                        <span
-                            className="tc-availability"
-                            style={{ color: availStyle.color, background: availStyle.bg }}
-                        >
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12 6 12 12 16 14" />
-                            </svg>
-                            {availability}
+                    {availability && (
+                        <span className="tc-availability">
+                            [Availability: {availability}]
                         </span>
                     )}
                     <a className="tc-view-btn" href={profileUrl}>

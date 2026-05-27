@@ -1,33 +1,118 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import TalentSearchBar from "./components/TalentSearchBar";
 import TalentCard from "./components/TalentCard";
+import { fetchTalents, setPage, toggleSaveFreelancer } from "./talentSlice";
+
+/**
+ * Utility: Extract initials from full name
+ */
+function getInitials(fullName) {
+  if (!fullName) return "?";
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return fullName.substring(0, 2).toUpperCase();
+}
+
+/**
+ * Utility: Generate consistent avatar color from name
+ */
+function getAvatarColor(fullName) {
+  const colors = [
+    "#7AC943", "#43A047", "#2E7D32", "#388E3C",
+    "#4CAF50", "#66BB6A", "#81C784", "#A5D6A7"
+  ];
+  if (!fullName) return colors[0];
+  const hash = fullName.charCodeAt(0) + fullName.charCodeAt(fullName.length - 1);
+  return colors[hash % colors.length];
+}
+
+/**
+ * Utility: Map proficiency levels to short form
+ */
+function mapProficiencyLevel(level) {
+  const mapping = {
+    "Beginner": "Beg",
+    "Intermediate": "Int",
+    "Expert": "Exp",
+  };
+  return mapping[level] || level;
+}
+
+/**
+ * Utility: Transform API talent response to component props
+ */
+function transformTalent(apiTalent) {
+  const initials = getInitials(apiTalent.fullName);
+  const avatarColor = getAvatarColor(apiTalent.fullName);
+
+  return {
+    id: apiTalent.id,
+    initials,
+    avatarColor,
+    avatarUrl: apiTalent.profilePicturePath || null,
+    name: apiTalent.fullName,
+    isVerified: apiTalent.isVerified || false,
+    isSaved: apiTalent.isSaved || false,
+    badge: null, // TODO: Determine badge logic if needed
+    title: apiTalent.title || "Freelancer",
+    jobSuccess: apiTalent.trustScore || 0,
+    earned: null, // Not provided in API, removed per requirements
+    rating: apiTalent.averageRating || 0,
+    ratingCount: apiTalent.totalReviews || 0,
+    hourlyRate: apiTalent.hourlyRate || 0,
+    bio: apiTalent.bio || "",
+    skills: (apiTalent.skills || []).map((skill) => ({
+      name: skill.skillName,
+      level: mapProficiencyLevel(skill.proficiencyLevel),
+    })),
+    availability: apiTalent.availability || "Not specified",
+    isOnline: false, // Not provided in API
+    profileUrl: `/client/freelancer/${apiTalent.id}`,
+  };
+}
 
 /**
  * SearchTalentPage
  * Main page for browsing and searching freelancers.
- *
- * State is ready for API integration:
- *   - Replace `talents` with data from your API call
- *   - Wire `search` value into your API query params
- *   - Wire `onFilter` to open a filter sidebar/modal when ready
- *   - Wire `onInvite` to your invite-to-job API call
+ * Connected to Redux for state management and API integration.
  */
 export default function SearchTalentPage() {
-    const [search, setSearch] = useState("");
+  const dispatch = useDispatch();
+  const { talents, loading, error, pagination } = useSelector(
+    (state) => state.talent
+  );
 
-    // ── Placeholder: replace with API data ──────────────────────────────────────
-    const talents = [];
-    const loading = false;
-    // ────────────────────────────────────────────────────────────────────────────
+  const [search, setSearch] = useState("");
 
-    const handleFilter = () => {
-        // TODO: open filter sidebar or modal
-    };
+  // Fetch talents on component mount
+  useEffect(() => {
+    dispatch(fetchTalents({ page: 1, pageSize: 10 }));
+  }, [dispatch]);
 
-    const handleInvite = (talentId) => {
-        // TODO: call invite-to-job API with talentId
-        console.log("Invite clicked for talent:", talentId);
-    };
+  const handleFilter = () => {
+    // TODO: Open filter sidebar or modal
+    console.log("Filter clicked");
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = pagination.page + 1;
+    dispatch(setPage(nextPage));
+    dispatch(fetchTalents({ page: nextPage, pageSize: pagination.pageSize }));
+  };
+
+  const handleInvite = (talentId) => {
+    // TODO: Call invite-to-job API with talentId
+    console.log("Invite clicked for talent:", talentId);
+  };
+
+  const handleBookmark = (talentId, isSaved) => {
+    dispatch(toggleSaveFreelancer({ freelancerId: talentId, isSaved }));
+  };
+
+  const transformedTalents = talents.map(transformTalent);
 
     return (
         <>
@@ -36,10 +121,9 @@ export default function SearchTalentPage() {
 
         :root {
           --st-gold:    #C9A84C;
-          --st-gold-lt: #E5C97A;
-          --st-bg:      #f5f4f1;
+          --st-bg:      #f9f9f7;
           --st-border:  #e6e4df;
-          --st-muted:   #9a9590;
+          --st-muted:   #999;
           --st-text:    #1c1a17;
           --st-radius:  12px;
         }
@@ -54,61 +138,51 @@ export default function SearchTalentPage() {
         /* ── Hero ── */
         .st-hero {
           position: relative;
-          max-width: 860px;
+          max-width: 1000px;
           margin: 0 auto;
-          padding: 3.5rem 2rem 2rem;
-          overflow: hidden;
-        }
-
-        /* decorative gold triangle */
-        .st-hero-deco {
-          position: absolute;
-          right: 0;
-          top: 10px;
-          width: 180px;
-          height: 180px;
-          pointer-events: none;
-          opacity: 0.25;
+          padding: 4rem 2rem 2rem;
+          text-align: center;
         }
 
         .st-hero-title {
-          font-size: clamp(2rem, 5vw, 2.75rem);
-          font-weight: 800;
-          letter-spacing: -0.03em;
-          line-height: 1.1;
-          margin-bottom: 0.75rem;
+          font-size: 2.8rem;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          line-height: 1.15;
+          margin-bottom: 0.8rem;
+          color: #000;
         }
 
         .st-hero-sub {
-          font-size: 0.95rem;
+          font-size: 1rem;
           color: var(--st-muted);
-          max-width: 360px;
+          max-width: 600px;
           line-height: 1.6;
-          margin-bottom: 2rem;
+          margin: 0 auto 2.2rem;
         }
 
         /* ── Cards list ── */
         .st-list {
-          max-width: 860px;
+          max-width: 1000px;
           margin: 0 auto;
-          padding: 1.5rem 2rem 5rem;
+          padding: 2rem 2rem 5rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.2rem;
         }
 
         /* ── Empty / Loading states ── */
         .st-state {
           text-align: center;
-          padding: 4rem 2rem;
+          padding: 5rem 2rem;
           color: var(--st-muted);
-          font-size: 0.95rem;
+          font-size: 1rem;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.75rem;
+          gap: 1rem;
         }
-        .st-state svg { opacity: 0.35; }
+        .st-state svg { opacity: 0.3; width: 56px; height: 56px; }
 
         /* ── Skeleton card ── */
         .st-skeleton {
@@ -140,12 +214,7 @@ export default function SearchTalentPage() {
 
                 {/* Hero */}
                 <div className="st-hero">
-                    {/* Decorative triangle */}
-                    <svg className="st-hero-deco" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="90,10 170,170 10,170" fill="none" stroke="#C9A84C" strokeWidth="2" />
-                    </svg>
-
-                    <h1 className="st-hero-title">Find Your Perfect<br />Talent</h1>
+                    <h1 className="st-hero-title">Find Your Perfect Talent</h1>
                     <p className="st-hero-sub">
                         Connect with top-rated freelancers and agencies for your next project.
                     </p>
@@ -173,24 +242,50 @@ export default function SearchTalentPage() {
                     ))}
 
                     {/* Empty state */}
-                    {!loading && talents.length === 0 && (
+                    {!loading && transformedTalents.length === 0 && (
                         <div className="st-state">
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9a9590" strokeWidth="1.5">
                                 <circle cx="11" cy="11" r="8" />
                                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
                             </svg>
-                            <span>No talent found. Results will appear here once the API is connected.</span>
+                            <span>{error ? `Error: ${error}` : "No talent found. Try adjusting your search criteria."}</span>
                         </div>
                     )}
 
                     {/* Talent cards */}
-                    {!loading && talents.map((talent) => (
+                    {!loading && transformedTalents.map((talent) => (
                         <TalentCard
                             key={talent.id}
                             talent={talent}
                             onInvite={handleInvite}
+                            onBookmark={handleBookmark}
                         />
                     ))}
+
+                    {/* Load More button */}
+                    {!loading && transformedTalents.length > 0 && pagination.hasNextPage && (
+                        <div style={{ textAlign: "center", marginTop: "2rem", paddingBottom: "2rem" }}>
+                            <button
+                                onClick={handleLoadMore}
+                                style={{
+                                    background: "#C9A84C",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "8px",
+                                    padding: "0.75rem 2rem",
+                                    fontSize: "0.95rem",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    fontFamily: "'DM Sans', system-ui, sans-serif",
+                                    transition: "opacity 0.15s",
+                                }}
+                                onMouseEnter={(e) => e.target.style.opacity = "0.88"}
+                                onMouseLeave={(e) => e.target.style.opacity = "1"}
+                            >
+                                Load More Talents
+                            </button>
+                        </div>
+                    )}
 
                 </div>
             </div>

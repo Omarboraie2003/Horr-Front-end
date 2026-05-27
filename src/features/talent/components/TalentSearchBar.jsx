@@ -21,19 +21,20 @@ export default function TalentSearchBar({
         .tsb-wrap {
           display: flex;
           align-items: center;
-          gap: 0.6rem;
-          max-width: 520px;
+          gap: 0.8rem;
+          max-width: 700px;
+          margin: 0 auto;
         }
 
         .tsb-input-wrap {
           flex: 1;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.6rem;
           background: #ffffff;
-          border: 1.5px solid #e6e4df;
+          border: 1px solid #e0e0e0;
           border-radius: 999px;
-          padding: 0.6rem 1.2rem;
+          padding: 0.75rem 1.5rem;
           transition: border-color 0.18s, box-shadow 0.18s;
         }
         .tsb-input-wrap:focus-within {
@@ -41,31 +42,31 @@ export default function TalentSearchBar({
           box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
         }
         .tsb-input-wrap svg {
-          color: #c0bdb8;
+          color: #ccc;
           flex-shrink: 0;
         }
         .tsb-input {
           flex: 1;
           border: none;
           outline: none;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           font-family: inherit;
           background: transparent;
           color: #1c1a17;
         }
-        .tsb-input::placeholder { color: #c0bdb8; }
+        .tsb-input::placeholder { color: #ccc; }
 
         .tsb-filter-btn {
-          width: 42px;
-          height: 42px;
+          width: 48px;
+          height: 48px;
           border-radius: 10px;
-          border: 1.5px solid #e6e4df;
+          border: 1px solid #e0e0e0;
           background: #ffffff;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #9a9590;
+          color: #888;
           flex-shrink: 0;
           transition: border-color 0.15s, color 0.15s, background 0.15s;
         }

@@ -282,7 +282,7 @@ export default function Navbar({ role = "client", user = null }) {
                 <hr className="horr-dd-divider" />
                 <div className="horr-dd-section-title">Find freelancers</div>
                 <Link className="horr-dd-item" to="/client/post-job">Post a job</Link>
-                <Link className="horr-dd-item" to="/client/search-talent">Search for talent</Link>
+                <Link className="horr-dd-item" to="/client/SearchTalentPage">Search for talent</Link>
                 <Link className="horr-dd-item" to="/client/hired-talent">Talent you've hired</Link>
                 <Link className="horr-dd-item" to="/client/saved-talent">Talent you've saved</Link>
                 <Link className="horr-dd-item" to="/client/direct-contracts">Direct Contracts</Link>
