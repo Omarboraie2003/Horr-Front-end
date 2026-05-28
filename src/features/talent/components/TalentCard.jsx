@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import TalentBadge from "./TalentBadge";
 import SkillTags from "./SkillTags";
 
@@ -30,13 +29,6 @@ import SkillTags from "./SkillTags";
  *   onBookmark:   (talentId, isSaved) => void — called when bookmark button is clicked
  */
 export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
-  const [bookmarked, setBookmarked] = useState(talent.isSaved ?? false);
-
-  // Keep local bookmarked state in sync with prop changes
-  useEffect(() => {
-    setBookmarked(talent.isSaved ?? false);
-  }, [talent.isSaved]);
-
     const {
         id,
         initials = "?",
@@ -50,12 +42,14 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
         earned = null,
         rating = null,
         ratingCount = null,
+        hourlyRate = null,
         bio = "",
         skills = [],
         availability = null,
         isOnline = false,
         profileUrl = "#",
     } = talent;
+    const bookmarked = talent.isSaved ?? false;
 
     const formatEarned = (val) => {
         if (val >= 1000) return `$${(val / 1000).toFixed(0)}k+`;
@@ -323,9 +317,7 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
                         <button
                           className={`tc-bookmark-btn ${bookmarked ? "active" : ""}`}
                           onClick={() => {
-                            const prev = bookmarked;
-                            setBookmarked(!prev);
-                            onBookmark?.(id, prev);
+                            onBookmark?.(id, bookmarked);
                           }}
                           aria-label="Bookmark freelancer"
                         >

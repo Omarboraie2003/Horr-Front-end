@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod, updatePaymentMethod } from '../../../services/clientService';
 import useFetch from '../../../hooks/useFetch';
 import { toast } from 'sonner';
@@ -74,7 +74,7 @@ const BillingSection = () => {
       await Promise.all([refreshPaymentMethods(), refreshOnboarding()]);
       setIsAddingMethod(false);
       setIdentifier('');
-    } catch (err) {
+    } catch {
       toast.error('Failed to add billing method');
     } finally {
       setSaving(false);
@@ -88,7 +88,7 @@ const BillingSection = () => {
       toast.success('Payment method removed');
       await Promise.all([refreshPaymentMethods(), refreshOnboarding()]);
       setShowDeleteConfirm(false);
-    } catch (err) {
+    } catch {
       toast.error('Failed to remove payment method');
     } finally {
       setDeletingId(null);
@@ -109,7 +109,7 @@ const BillingSection = () => {
       toast.success('Billing method updated successfully!');
       await Promise.all([refreshPaymentMethods(), refreshOnboarding()]);
       setEditingId(null);
-    } catch (err) {
+    } catch {
       toast.error('Failed to update billing method');
     } finally {
       setUpdating(false);

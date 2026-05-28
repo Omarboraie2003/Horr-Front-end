@@ -4,10 +4,9 @@ import { useState, useEffect, useCallback } from "react";
  * useFetch - A generic hook for making API calls.
  * 
  * @param {Function} apiFunc - The service function to call (e.g., getClientJobs).
- * @param {Array} dependencies - Array of values that trigger a refetch when changed.
  * @param {Boolean} immediate - Whether to fire the request immediately on mount.
  */
-export default function useFetch(apiFunc, dependencies = [], immediate = true) {
+export default function useFetch(apiFunc, immediate = true) {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(immediate);
   const [error,   setError]   = useState(null);
@@ -28,9 +27,13 @@ export default function useFetch(apiFunc, dependencies = [], immediate = true) {
 
   useEffect(() => {
     if (immediate) {
-      fetchData();
+      const timeoutId = setTimeout(() => {
+        fetchData();
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
-  }, [...dependencies]); // eslint-disable-line react-hooks/exhaustive-deps
+    return undefined;
+  }, [immediate, fetchData]);
 
   return { data, loading, error, setData, refetch: fetchData };
 }

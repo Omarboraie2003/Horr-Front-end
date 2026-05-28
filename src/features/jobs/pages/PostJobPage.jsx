@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { createJob, getCategories, getSkills } from "../../../services/clientService";
@@ -89,7 +89,6 @@ export default function PostJobPage() {
   const [step,            setStep]            = useState(1);
   const [categories,      setCategories]      = useState([]);
   const [availableSkills, setAvailableSkills] = useState([]);
-  const [suggestedSkills, setSuggestedSkills] = useState([]);
   const [submitting,      setSubmitting]      = useState(false);
   const [error,           setError]           = useState(null);
   const [skillInput,      setSkillInput]      = useState("");
@@ -120,13 +119,12 @@ export default function PostJobPage() {
   }, []);
 
   // Map skills to suggestions (optional: filter by categoryId if backend supports it)
-  useEffect(() => {
+  const suggestedSkills = useMemo(() => {
     if (!jobData.categoryId) {
-      setSuggestedSkills([]);
-      return;
+      return [];
     }
     // For now, just show the first 8 skills
-    setSuggestedSkills(availableSkills.slice(0, 8));
+    return availableSkills.slice(0, 8);
   }, [jobData.categoryId, availableSkills]);
 
   // Skills logic

@@ -68,7 +68,7 @@ export const getFreelancerById = async (freelancerId) => {
 export const saveFreelancer = async (freelancerId) => {
   try {
     const response = await apiClient.post(
-      `/api/client/freelancers/${freelancerId}/save`
+      `/client/freelancers/${freelancerId}/save`
     );
     return response.data;
   } catch (error) {
@@ -85,7 +85,7 @@ export const saveFreelancer = async (freelancerId) => {
 export const unsaveFreelancer = async (freelancerId) => {
   try {
     const response = await apiClient.delete(
-      `/api/client/freelancers/${freelancerId}/save`
+      `/client/freelancers/${freelancerId}/save`
     );
     return response.data;
   } catch (error) {

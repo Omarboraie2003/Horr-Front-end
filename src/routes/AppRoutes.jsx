@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
@@ -24,7 +23,8 @@ const AppRoutes = () => {
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/client/post-job" element={<PostJobPage />} />
           <Route path="/client/settings" element={<SettingsPage />} />
-          <Route path="/client/SearchTalentPage" element={<SearchTalentPage />} />
+          <Route path="/client/search-talent" element={<SearchTalentPage />} />
+          <Route path="/client/SearchTalentPage" element={<Navigate to="/client/search-talent" replace />} />
         </Route>
       </Route>
 

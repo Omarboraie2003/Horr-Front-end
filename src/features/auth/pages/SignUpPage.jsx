@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../../../assets/images/Horr logo.png";
 import { register } from "../../../services/authService";

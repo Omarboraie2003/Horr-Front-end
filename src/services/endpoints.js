@@ -35,7 +35,7 @@ export const ENDPOINTS = {
   SKILLS: '/Skills',
 
   TALENT: {
-  searchFreelancers: 'client/freelancers/search',
+  searchFreelancers: '/client/freelancers/search',
   }
 
 

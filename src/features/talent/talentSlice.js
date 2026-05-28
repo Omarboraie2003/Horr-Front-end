@@ -83,7 +83,6 @@ const talentSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchTalents.fulfilled, (state, action) => {
-          console.log("API response payload:", action.payload);
         state.loading = false;
         const page = action.meta?.arg?.page || 1;
         const items = action.payload.items || [];

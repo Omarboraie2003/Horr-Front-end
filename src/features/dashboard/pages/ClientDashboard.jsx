@@ -300,22 +300,31 @@ export default function ClientDashboard() {
   const [view, setView] = useState("grid");
   const [editingJob, setEditingJob] = useState(null);
   const [deletingJob, setDeletingJob] = useState(null);
-  const [jobs, setJobs] = useState([]);
 
   const { user, loading: authLoading } = useAuth();
 
   const { data: steps, loading: stepsLoading, error: stepsError } = useFetch(getOnboardingStatus);
-  const { data: jobsData, loading: jobsLoading, error: jobsError } = useFetch(getClientJobs);
-
-  useEffect(() => {
-    if (jobsData) setJobs(jobsData);
-  }, [jobsData]);
+  const {
+    data: jobsData,
+    loading: jobsLoading,
+    error: jobsError,
+    setData: setJobsData,
+  } = useFetch(getClientJobs);
 
   const loading = authLoading || stepsLoading || jobsLoading;
   const error = stepsError || jobsError;
+  const jobs = Array.isArray(jobsData) ? jobsData : [];
 
-  const handleJobSaved = (updated) => setJobs((p) => p.map((j) => j.id === updated?.id ? { ...j, ...updated } : j));
-  const handleJobDeleted = (id) => setJobs((p) => p.filter((j) => j.id !== id));
+  const handleJobSaved = (updated) =>
+    setJobsData((prev) =>
+      Array.isArray(prev)
+        ? prev.map((j) => (j.id === updated?.id ? { ...j, ...updated } : j))
+        : prev
+    );
+  const handleJobDeleted = (id) =>
+    setJobsData((prev) =>
+      Array.isArray(prev) ? prev.filter((j) => j.id !== id) : prev
+    );
 
   const stepCards = steps
     ? [
