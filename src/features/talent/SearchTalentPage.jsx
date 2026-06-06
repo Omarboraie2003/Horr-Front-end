@@ -34,9 +34,10 @@ function getAvatarColor(fullName) {
  */
 function mapProficiencyLevel(level) {
   const mapping = {
-    "Beginner": "Beg",
-    "Intermediate": "Int",
-    "Expert": "Exp",
+    Beginner: "Beg",
+    Intermediate: "Int",
+    Expert: "Exp",
+    Advanced: "Exp",
   };
   return mapping[level] || level;
 }

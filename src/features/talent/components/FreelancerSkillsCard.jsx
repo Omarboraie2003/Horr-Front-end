@@ -1,19 +1,37 @@
+import { Sparkles } from "lucide-react";
+import FreelancerSectionCard from "./FreelancerSectionCard";
+
+function skillLevelClass(level = "") {
+  const normalized = level.toLowerCase();
+  if (normalized.includes("exp") || normalized.includes("advanced")) return "level-expert";
+  if (normalized.includes("int")) return "level-intermediate";
+  if (normalized.includes("beg")) return "level-beginner";
+  return "level-default";
+}
+
 export default function FreelancerSkillsCard({ skills }) {
   return (
-    <section className="fd-card">
-      <h3 className="fd-section-title">Skills</h3>
-      {skills.length === 0 ? (
-        <p className="fd-muted">No skills were added yet.</p>
-      ) : (
+    <FreelancerSectionCard
+      title="Skills"
+      icon={<Sparkles size={16} strokeWidth={2} />}
+      empty={skills.length === 0}
+      emptyMessage="No skills were added yet."
+    >
+      {skills.length > 0 ? (
         <div className="fd-skills-wrap">
           {skills.map((skill, index) => (
-            <span className="fd-skill-pill" key={`${skill.name}-${index}`}>
-              {skill.name}
-              {skill.level ? <small>{skill.level}</small> : null}
+            <span
+              className={`fd-skill-pill ${skillLevelClass(skill.level)}`}
+              key={`${skill.name}-${index}`}
+            >
+              <span className="fd-skill-name">{skill.name}</span>
+              {skill.level ? (
+                <span className="fd-skill-level">{skill.level}</span>
+              ) : null}
             </span>
           ))}
         </div>
-      )}
-    </section>
+      ) : null}
+    </FreelancerSectionCard>
   );
 }

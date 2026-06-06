@@ -13,6 +13,12 @@ function toTitleCase(value = "") {
     .join(" ");
 }
 
+const EXPERIENCE_LEVELS = {
+  0: "Entry Level",
+  1: "Intermediate",
+  2: "Expert",
+};
+
 function mapSkills(skills = []) {
   return skills.map((skill) => {
     if (typeof skill === "string") {
@@ -25,54 +31,43 @@ function mapSkills(skills = []) {
   });
 }
 
-export function mapFreelancerDetails(freelancer = {}) {
-  const locationParts = [
-    freelancer.city,
-    freelancer.stateProvince,
-    freelancer.country,
-  ].filter(Boolean);
+/**
+ * Maps public profile API payload to UI model.
+ * @param {Object} profile - API `data` object
+ * @param {{ id?: string, isSaved?: boolean }} meta
+ */
+export function mapFreelancerDetails(profile = {}, meta = {}) {
+  const locationParts = [profile.city, profile.country].filter(Boolean);
 
   return {
-    id: freelancer.id,
-    fullName: freelancer.fullName || "Unknown Freelancer",
-    initials: getInitials(freelancer.fullName),
-    title: freelancer.title || "Freelancer",
-    bio: freelancer.bio || "",
-    avatarUrl: freelancer.profilePicturePath || "",
-    isVerified: Boolean(freelancer.isVerified),
-    isSaved: Boolean(freelancer.isSaved),
-    trustScore: Number(freelancer.trustScore ?? 0),
-    averageRating: Number(freelancer.averageRating ?? 0),
-    totalReviews: Number(freelancer.totalReviews ?? 0),
-    hourlyRate:
-      freelancer.hourlyRate === null || freelancer.hourlyRate === undefined
-        ? null
-        : Number(freelancer.hourlyRate),
-    availability: freelancer.availability || "Not specified",
+    id: meta.id || "",
+    fullName: profile.fullName || "Unknown Freelancer",
+    initials: getInitials(profile.fullName),
+    title: profile.title || "Freelancer",
+    bio: profile.bio || "",
+    avatarUrl: profile.profilePicturePath || "",   
+    isVerified: Boolean(profile.isVerified),
+    isSaved: Boolean(meta.isSaved),
+    trustScore: Number(profile.trustScore ?? 0),
+    experienceLevel:
+      EXPERIENCE_LEVELS[profile.experienceLevel] ||
+      (profile.experienceLevel != null ? String(profile.experienceLevel) : ""),
     yearsOfExperience:
-      freelancer.yearsOfExperience === null ||
-      freelancer.yearsOfExperience === undefined
+      profile.yearsOfExperience === null ||
+      profile.yearsOfExperience === undefined
         ? null
-        : Number(freelancer.yearsOfExperience),
-    role: freelancer.role || "",
-    email: freelancer.email || "",
-    phoneNumber: freelancer.phoneNumber || "",
-    address: freelancer.address || "",
-    zipCode: freelancer.zipCode || "",
-    timeZone: freelancer.timeZone || "",
+        : Number(profile.yearsOfExperience),
+    totalEarnings: profile.totalEarnings ?? "0",
+    totalJobs: Number(profile.totalJobs ?? 0),
+    totalHours: Number(profile.totalHours ?? 0),
     locationLabel: locationParts.join(", "),
-    portfolioUrl: freelancer.portfolioUrl || "",
-    skills: mapSkills(freelancer.skills || []),
-    languages: Array.isArray(freelancer.languages) ? freelancer.languages : [],
-    education: Array.isArray(freelancer.education) ? freelancer.education : [],
-    experienceDetails: Array.isArray(freelancer.experienceDetails)
-      ? freelancer.experienceDetails
+    portfolio: Array.isArray(profile.portfolio) ? profile.portfolio : [],
+    skills: mapSkills(profile.skills || []),
+    languages: Array.isArray(profile.languages) ? profile.languages : [],
+    education: Array.isArray(profile.education) ? profile.education : [],
+    employmentHistory: Array.isArray(profile.employmentHistory)
+      ? profile.employmentHistory
       : [],
-    employmentHistory: Array.isArray(freelancer.employmentHistory)
-      ? freelancer.employmentHistory
-      : [],
-    createdAt: freelancer.createdAt || "",
-    updatedAt: freelancer.updatedAt || "",
     formatLanguage(language) {
       if (typeof language === "string") return language;
       const name = language.name || language.languageName || "Language";
@@ -83,16 +78,17 @@ export function mapFreelancerDetails(freelancer = {}) {
       if (typeof education === "string") return education;
       const degree = education.degree || education.title || "Education";
       const school = education.school || education.institution || "";
+      const field = education.fieldOfStudy || "";
       const year = education.year || education.graduationYear || "";
-      const suffix = [school, year].filter(Boolean).join(", ");
-      return suffix ? `${degree} - ${suffix}` : degree;
+      const details = [school, field, year].filter(Boolean).join(", ");
+      return details ? `${degree} - ${details}` : degree;
     },
     formatExperience(experience) {
       if (typeof experience === "string") return experience;
       const title = experience.title || experience.position || "Experience";
       const company = experience.company || experience.organization || "";
-      const from = experience.startDate || experience.from || "";
-      const to = experience.endDate || experience.to || "Present";
+      const from = experience.fromDate || experience.startDate || experience.from || "";
+      const to = experience.toDate || experience.endDate || experience.to || "Present";
       const period = from ? `${from} - ${to}` : "";
       const suffix = [company, period].filter(Boolean).join(" | ");
       return suffix ? `${title} - ${suffix}` : title;

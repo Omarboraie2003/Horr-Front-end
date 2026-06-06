@@ -1,6 +1,6 @@
 import TalentBadge from "./TalentBadge";
 import SkillTags from "./SkillTags";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 /**
  * TalentCard
@@ -30,6 +30,7 @@ import { Link } from "react-router-dom";
  *   onBookmark:   (talentId, isSaved) => void — called when bookmark button is clicked
  */
 export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
+    const navigate = useNavigate();
     const {
         id,
         initials = "?",
@@ -57,20 +58,76 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
         return `$${val}`;
     };
 
+    const handleCardClick = () => {
+        if (profileUrl && profileUrl !== "#") {
+            navigate(profileUrl);
+        }
+    };
+
+    const handleCardKeyDown = (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleCardClick();
+        }
+    };
+
     return (
         <>
             <style>{`
+        @keyframes goldenWave {
+          0% {
+            left: -100%;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+
         .tc-card {
           background: #ffffff;
           border: 1px solid #e6e4df;
           border-radius: 12px;
           padding: 1.5rem;
-          transition: box-shadow 0.2s;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           font-family: 'DM Sans', system-ui, sans-serif;
           color: #1c1a17;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
         }
+
+        .tc-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(201, 168, 76, 0.3),
+            rgba(201, 168, 76, 0.6),
+            rgba(201, 168, 76, 0.3),
+            transparent
+          );
+          border-radius: 12px;
+          pointer-events: none;
+        }
+
+        .tc-card:hover::before {
+          animation: goldenWave 0.8s ease-in-out infinite;
+        }
+
         .tc-card:hover {
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+          box-shadow: 0 12px 48px rgba(201, 168, 76, 0.18);
+          transform: translateY(-4px);
+          background-color: #fafaf8;
+          border-color: rgba(201, 168, 76, 0.45);
+        }
+
+        .tc-card:active {
+          transform: translateY(-2px);
         }
 
         /* ── Main container ── */
@@ -286,8 +343,14 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
         }
       `}</style>
 
-            <div className="tc-card">
-
+            <div
+                className="tc-card"
+                role="link"
+                tabIndex={0}
+                onClick={handleCardClick}
+                onKeyDown={handleCardKeyDown}
+                aria-label={`View profile for ${name}`}
+            >
                 {/* Main container */}
                 <div className="tc-container">
 
@@ -316,8 +379,10 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
                     {/* Bookmark + Invite */}
                     <div className="tc-actions">
                         <button
+                          type="button"
                           className={`tc-bookmark-btn ${bookmarked ? "active" : ""}`}
-                          onClick={() => {
+                          onClick={(event) => {
+                            event.stopPropagation();
                             onBookmark?.(id, bookmarked);
                           }}
                           aria-label="Bookmark freelancer"
@@ -326,7 +391,14 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
                                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
                             </svg>
                         </button>
-                        <button className="tc-invite-btn" onClick={() => onInvite?.(id)}>
+                        <button
+                          type="button"
+                          className="tc-invite-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onInvite?.(id);
+                          }}
+                        >
                             Invite to Job
                         </button>
                     </div>
@@ -381,13 +453,13 @@ export default function TalentCard({ talent = {}, onInvite, onBookmark }) {
                             [Availability: {availability}]
                         </span>
                     )}
-                    <Link className="tc-view-btn" to={profileUrl}>
+                    <span className="tc-view-btn">
                         View Profile
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12" />
                             <polyline points="12 5 19 12 12 19" />
                         </svg>
-                    </Link>
+                    </span>
                 </div>
 
             </div>

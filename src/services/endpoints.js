@@ -13,6 +13,7 @@ export const ENDPOINTS = {
     UPDATE_EMAIL: '/UserProfile/email',
     UPDATE_LOCATION: '/UserProfile/location',
     PAYMENT_METHOD: '/UserProfile/payment-method',
+    PUBLIC: '/UserProfile/public/{userIdHash}',
   },
   BILLING: {
     WALLET_BALANCE: '/Billing/wallet-balance',
@@ -35,8 +36,10 @@ export const ENDPOINTS = {
   SKILLS: '/Skills',
 
   TALENT: {
-  searchFreelancers: '/client/freelancers/search',
-  }
+    searchFreelancers: '/client/freelancers/search',
+    saveFreelancer: '/client/freelancers/{freelancerId}/save',
+    unsaveFreelancer: '/client/freelancers/{freelancerId}/unsave',
+  },
 
 
 };

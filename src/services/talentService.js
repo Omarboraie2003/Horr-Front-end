@@ -6,21 +6,10 @@ import { ENDPOINTS } from "./endpoints";
  * API calls for freelancer/talent search and management
  */
 
+const unwrapData = (response) => response.data?.data ?? response.data;
+
 /**
  * Search freelancers with optional filters and pagination
- * @param {Object} params
- * @param {string} params.searchQuery - Search query (optional)
- * @param {string[]} params.skillIds - Array of skill IDs (optional)
- * @param {number} params.minHourlyRate - Minimum hourly rate (optional)
- * @param {number} params.maxHourlyRate - Maximum hourly rate (optional)
- * @param {number} params.minYearsExperience - Minimum years of experience (optional)
- * @param {number} params.minTrustScore - Minimum trust score (optional)
- * @param {boolean} params.isVerified - Filter by verified status (optional)
- * @param {string} params.sortBy - Sort field (default: "TrustScore")
- * @param {boolean} params.sortDescending - Sort direction (default: true)
- * @param {number} params.page - Page number (default: 1)
- * @param {number} params.pageSize - Page size (default: 10)
- * @returns {Promise} Response with items, pagination info
  */
 export const searchFreelancers = async (params = {}) => {
   const defaults = {
@@ -44,18 +33,17 @@ export const searchFreelancers = async (params = {}) => {
 };
 
 /**
- * Get a single freelancer's profile by ID
- * @param {string} freelancerId
- * @returns {Promise} Freelancer profile data
+ * Get public freelancer profile by hash id
+ * @param {string} userIdHash
  */
-export const getFreelancerById = async (freelancerId) => {
+export const getPublicFreelancerProfile = async (userIdHash) => {
   try {
     const response = await apiClient.get(
-      ENDPOINTS.TALENT.getFreelancerById.replace("{id}", freelancerId)
+      ENDPOINTS.USER_PROFILE.PUBLIC.replace("{userIdHash}", userIdHash)
     );
-    return response.data;
+    return unwrapData(response);
   } catch (error) {
-    console.error(`Error fetching freelancer ${freelancerId}:`, error);
+    console.error(`Error fetching public profile ${userIdHash}:`, error);
     throw error;
   }
 };
@@ -63,12 +51,11 @@ export const getFreelancerById = async (freelancerId) => {
 /**
  * Save/bookmark a freelancer
  * @param {string} freelancerId
- * @returns {Promise}
  */
 export const saveFreelancer = async (freelancerId) => {
   try {
     const response = await apiClient.post(
-      `/client/freelancers/${freelancerId}/save`
+      ENDPOINTS.TALENT.saveFreelancer.replace("{freelancerId}", freelancerId)
     );
     return response.data;
   } catch (error) {
@@ -80,12 +67,11 @@ export const saveFreelancer = async (freelancerId) => {
 /**
  * Unsave/unbookmark a freelancer
  * @param {string} freelancerId
- * @returns {Promise}
  */
 export const unsaveFreelancer = async (freelancerId) => {
   try {
     const response = await apiClient.delete(
-      `/client/freelancers/${freelancerId}/save`
+      ENDPOINTS.TALENT.unsaveFreelancer.replace("{freelancerId}", freelancerId)
     );
     return response.data;
   } catch (error) {

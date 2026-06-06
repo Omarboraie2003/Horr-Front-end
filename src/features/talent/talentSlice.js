@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { searchFreelancers, saveFreelancer, unsaveFreelancer } from "../../services/talentService";
+import {
+  searchFreelancers,
+  saveFreelancer,
+  unsaveFreelancer,
+  getPublicFreelancerProfile,
+} from "../../services/talentService";
 
-/**
- * talentSlice.js
- * Redux slice for talent/freelancer search and management
- */
-
-// Async thunks
 export const fetchTalents = createAsyncThunk(
   "talent/fetchTalents",
   async (params = {}, { rejectWithValue }) => {
@@ -16,6 +15,20 @@ export const fetchTalents = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch talents"
+      );
+    }
+  }
+);
+
+export const fetchFreelancerDetails = createAsyncThunk(
+  "talent/fetchFreelancerDetails",
+  async (userIdHash, { rejectWithValue }) => {
+    try {
+      const data = await getPublicFreelancerProfile(userIdHash);
+      return { userIdHash, data };
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch freelancer profile"
       );
     }
   }
@@ -43,6 +56,9 @@ const initialState = {
   talents: [],
   loading: false,
   error: null,
+  selectedFreelancer: null,
+  detailsLoading: false,
+  detailsError: null,
   pagination: {
     page: 1,
     pageSize: 10,
@@ -63,20 +79,23 @@ const talentSlice = createSlice({
     },
     setPageSize: (state, action) => {
       state.pagination.pageSize = action.payload;
-      state.pagination.page = 1; // Reset to page 1 when changing page size
+      state.pagination.page = 1;
     },
     setSearchParams: (state, action) => {
       state.searchParams = action.payload;
-      state.pagination.page = 1; // Reset to page 1 on new search
+      state.pagination.page = 1;
     },
     clearTalents: (state) => {
       state.talents = [];
       state.error = null;
       state.pagination = initialState.pagination;
     },
+    clearSelectedFreelancer: (state) => {
+      state.selectedFreelancer = null;
+      state.detailsError = null;
+    },
   },
   extraReducers: (builder) => {
-    // Fetch talents
     builder
       .addCase(fetchTalents.pending, (state) => {
         state.loading = true;
@@ -105,13 +124,36 @@ const talentSlice = createSlice({
         state.error = action.payload;
       });
 
-    // Toggle save freelancer
+    builder
+      .addCase(fetchFreelancerDetails.pending, (state) => {
+        state.detailsLoading = true;
+        state.detailsError = null;
+      })
+      .addCase(fetchFreelancerDetails.fulfilled, (state, action) => {
+        state.detailsLoading = false;
+        const { userIdHash, data } = action.payload;
+        const cached = state.talents.find((t) => t.id === userIdHash);
+        state.selectedFreelancer = {
+          userIdHash,
+          data,
+          isSaved: cached?.isSaved ?? false,
+        };
+      })
+      .addCase(fetchFreelancerDetails.rejected, (state, action) => {
+        state.detailsLoading = false;
+        state.detailsError = action.payload;
+        state.selectedFreelancer = null;
+      });
+
     builder
       .addCase(toggleSaveFreelancer.fulfilled, (state, action) => {
         const { freelancerId, isSaved } = action.payload;
         const talent = state.talents.find((t) => t.id === freelancerId);
         if (talent) {
           talent.isSaved = isSaved;
+        }
+        if (state.selectedFreelancer?.userIdHash === freelancerId) {
+          state.selectedFreelancer.isSaved = isSaved;
         }
       })
       .addCase(toggleSaveFreelancer.rejected, (state, action) => {
@@ -120,6 +162,11 @@ const talentSlice = createSlice({
   },
 });
 
-export const { setPage, setPageSize, setSearchParams, clearTalents } =
-  talentSlice.actions;
+export const {
+  setPage,
+  setPageSize,
+  setSearchParams,
+  clearTalents,
+  clearSelectedFreelancer,
+} = talentSlice.actions;
 export default talentSlice.reducer;
