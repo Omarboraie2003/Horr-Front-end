@@ -18,6 +18,23 @@ export const getClientJobs = async () => {
   return response.data;
 };
 
+export const sendConversationMessage = async (conversationId, { body, jobPostId, receiverId }) => {
+  const formData = new FormData();
+  formData.append('body', body);
+  formData.append('jobPostId', jobPostId);
+  formData.append('receiverId', receiverId);
+
+  // Ensure the request is sent as multipart/form-data. This request-level header
+  // overrides the apiClient default 'application/json' header so the browser
+  // includes the proper multipart boundary.
+  const response = await apiClient.post(
+    ENDPOINTS.CONVERSATIONS.SEND_MESSAGE.replace('{conversationId}', conversationId),
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data;
+};
+
 export const updateJob = async (jobId, jobData) => {
   const response = await apiClient.put(`${ENDPOINTS.JOBS.UPDATE}/${jobId}`, jobData);
   return response.data;

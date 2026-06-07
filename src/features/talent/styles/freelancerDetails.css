@@ -280,6 +280,122 @@
   box-shadow: 0 4px 14px rgba(201, 168, 76, 0.35);
 }
 
+.fd-invite-panel {
+  background: var(--fd-surface);
+  border: 1px solid var(--fd-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  padding: 1.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.fd-invite-panel-body {
+  display: grid;
+  gap: 1rem;
+}
+
+.fd-invite-panel-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.fd-invite-panel-label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fd-gold);
+}
+
+.fd-invite-panel-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--fd-text);
+}
+
+.fd-invite-panel-description {
+  margin: 0;
+  color: var(--fd-text-muted);
+  line-height: 1.6;
+}
+
+.fd-invite-textarea {
+  width: 100%;
+  min-height: 96px;
+  border-radius: 12px;
+  border: 1px solid var(--fd-border);
+  padding: 0.75rem 0.85rem;
+  font-size: 0.95rem;
+  color: var(--fd-text);
+  resize: vertical;
+}
+
+.fd-invite-remaining {
+  text-align: right;
+  color: var(--fd-text-muted);
+  font-size: 0.85rem;
+}
+
+.fd-invite-panel-controls {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fd-invite-select-label {
+  font-weight: 600;
+  color: var(--fd-text);
+  margin-bottom: 0.35rem;
+}
+
+.fd-invite-select {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--fd-border);
+  background: #fff;
+  color: var(--fd-text);
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+}
+
+.fd-invite-send-btn {
+  align-self: start;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--fd-gold), var(--fd-gold-lt));
+  color: #fff;
+  font-weight: 700;
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.fd-invite-send-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.fd-invite-send-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.fd-invite-error,
+.fd-invite-success {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.fd-invite-error {
+  color: #b91c1c;
+}
+
+.fd-invite-success {
+  color: #047857;
+}
+
 .fd-stats-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

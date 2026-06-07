@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import TalentSearchBar from "./components/TalentSearchBar";
 import TalentCard from "./components/TalentCard";
 import { fetchTalents, setPage, toggleSaveFreelancer } from "./talentSlice";
@@ -82,6 +83,7 @@ function transformTalent(apiTalent) {
  */
 export default function SearchTalentPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { talents, loading, error, pagination } = useSelector(
     (state) => state.talent
   );
@@ -105,8 +107,7 @@ export default function SearchTalentPage() {
   };
 
   const handleInvite = (talentId) => {
-    // TODO: Call invite-to-job API with talentId
-    console.log("Invite clicked for talent:", talentId);
+    navigate(`/client/freelancer/${talentId}?invite=true`);
   };
 
   const handleBookmark = (talentId, isSaved) => {

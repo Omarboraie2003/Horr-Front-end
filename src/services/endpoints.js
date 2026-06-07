@@ -35,6 +35,10 @@ export const ENDPOINTS = {
   CATEGORIES: '/Categories',
   SKILLS: '/Skills',
 
+  CONVERSATIONS: {
+    SEND_MESSAGE: '/Conversations/{conversationId}/messages',
+  },
+
   TALENT: {
     searchFreelancers: '/client/freelancers/search',
     saveFreelancer: '/client/freelancers/{freelancerId}/save',
