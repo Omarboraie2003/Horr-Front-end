@@ -175,6 +175,18 @@ export default function FreelancerDetailsPage() {
 
         {inviteOpen && (
           <section className="fd-invite-panel">
+            <button
+              type="button"
+              className="fd-invite-close-btn"
+              onClick={() => {
+                setInviteOpen(false);
+                setInviteError(null);
+                setInviteSuccess("");
+              }}
+              aria-label="Close invitation panel"
+            >
+              ×
+            </button>
             <div className="fd-invite-panel-body">
               <div className="fd-invite-panel-copy">
                 <p className="fd-invite-panel-label">Invite this freelancer</p>

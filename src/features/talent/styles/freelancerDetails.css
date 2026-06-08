@@ -281,6 +281,7 @@
 }
 
 .fd-invite-panel {
+  position: relative;
   background: var(--fd-surface);
   border: 1px solid var(--fd-border);
   border-radius: 16px;
@@ -336,6 +337,27 @@
   text-align: right;
   color: var(--fd-text-muted);
   font-size: 0.85rem;
+}
+
+.fd-invite-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--fd-text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.fd-invite-close-btn:hover {
+  background: rgba(0,0,0,0.04);
+  color: var(--fd-text);
 }
 
 .fd-invite-panel-controls {
