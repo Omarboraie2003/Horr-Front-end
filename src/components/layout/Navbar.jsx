@@ -277,7 +277,7 @@ export default function Navbar({ role = "client", user = null }) {
 
               <div className={`horr-dropdown ${dropdownOpen ? "visible" : ""}`}>
                 <div className="horr-dd-section-title">Manage jobs and offers</div>
-                <Link className="horr-dd-item" to="/client/job-posts">Job posts and proposals</Link>
+                <Link className="horr-dd-item" to="/client/job-proposals">Job proposals</Link>
                 <Link className="horr-dd-item" to="/client/contracts">Pending offers</Link>
                 <hr className="horr-dd-divider" />
                 <div className="horr-dd-section-title">Find freelancers</div>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getOnboardingStatus, getClientJobs, updateJob, deleteJob } from "../../../services/clientService";
 import useAuth from "../../auth/hooks/useAuth";
 import useFetch from "../../../hooks/useFetch";
@@ -237,15 +237,17 @@ function DeleteConfirmModal({ job, onClose, onDeleted }) {
 
 // ── Job Card ──────────────────────────────────────────────────────────────────
 function JobCard({ job, onEdit, onDelete }) {
+  const navigate = useNavigate();
+
   const dateLabel = job.postedAt || job.createdAt
     ? new Date(job.postedAt || job.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : "Unknown date";
 
   const statItems = [
-    { key: "Invited", val: job.stats?.invitationsCount ?? 0 },
-    { key: "Proposals", val: job.stats?.proposalsCount ?? 0 },
-    { key: "Messaged", val: job.stats?.messagedCount ?? 0 },
-    { key: "Hired", val: job.stats?.hiredCount ?? 0 },
+    { key: "Invited",   val: job.stats?.invited   ?? 0 },
+    { key: "Proposals", val: job.stats?.proposals  ?? 0, jobId: job.id },
+    { key: "Messaged",  val: job.stats?.messaged   ?? 0 },
+    { key: "Hired",     val: job.stats?.hired      ?? 0 },
   ];
 
   return (
@@ -261,12 +263,28 @@ function JobCard({ job, onEdit, onDelete }) {
         <JobMenu onEdit={() => onEdit(job)} onDelete={() => onDelete(job)} />
       </div>
       <div className="cd-job-stats">
-        {statItems.map(({ key, val }) => (
-          <div className="cd-stat" key={key}>
-            <span className="cd-stat-val">{val}</span>
-            <span className="cd-stat-key">{key}</span>
-          </div>
-        ))}
+        {statItems.map(({ key, val, jobId }) => {
+          const isClickable = key === "Proposals" && val > 0;
+          return (
+            <div
+              className="cd-stat"
+              key={key}
+              onClick={() => isClickable && navigate(`/client/job-proposals?jobId=${jobId}`)}
+              title={isClickable ? "View proposals" : ""}
+              style={{ cursor: isClickable ? "pointer" : "default" }}
+              onMouseEnter={e => { if (isClickable) e.currentTarget.style.background = "#fdf8ee"; }}
+              onMouseLeave={e => { if (isClickable) e.currentTarget.style.background = "transparent"; }}
+            >
+              <span
+                className="cd-stat-val"
+                style={{ color: isClickable ? "var(--cd-gold)" : undefined }}
+              >
+                {val}
+              </span>
+              <span className="cd-stat-key">{key}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -368,6 +386,7 @@ export default function ClientDashboard() {
       },
     ]
     : null;
+
   return (
     <>
       <style>{`
@@ -393,13 +412,11 @@ export default function ClientDashboard() {
         }
 
         body {
-          background: var(--cd-bg);
           color: var(--cd-text);
           font-family: 'Inter', system-ui, sans-serif;
           min-height: 100vh;
         }
 
-        /* ── Layout ── */
         .cd-main {
           max-width: 1080px;
           width: 100%;
@@ -407,7 +424,6 @@ export default function ClientDashboard() {
           padding: 2.75rem 1.5rem 5rem;
         }
 
-        /* ── Welcome ── */
         .cd-welcome {
           display: flex;
           align-items: center;
@@ -437,7 +453,6 @@ export default function ClientDashboard() {
           font-weight: 400;
         }
 
-        /* ── Buttons ── */
         .cd-btn-primary {
           display: inline-flex;
           align-items: center;
@@ -491,7 +506,6 @@ export default function ClientDashboard() {
         }
         .cd-btn-danger:hover { opacity: 0.88; transform: translateY(-1px); }
 
-        /* ── Section Header ── */
         .cd-section-title {
           font-size: 0.95rem;
           font-weight: 700;
@@ -500,7 +514,6 @@ export default function ClientDashboard() {
           letter-spacing: -0.01em;
         }
 
-        /* ── Steps ── */
         .cd-steps-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -555,7 +568,6 @@ export default function ClientDashboard() {
           line-height: 1;
         }
 
-        /* ── Overview header ── */
         .cd-overview-header {
           display: flex;
           align-items: center;
@@ -588,14 +600,12 @@ export default function ClientDashboard() {
           font-weight: 600;
         }
 
-        /* ── Job grid ── */
         .cd-jobs-wrap { display: grid; gap: 0.85rem; }
         .cd-jobs-wrap.view-grid {
           grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
         .cd-jobs-wrap.view-list { grid-template-columns: 1fr; }
 
-        /* ── Job Card ── */
         .cd-job-card {
           background: var(--cd-surface);
           border: 1px solid var(--cd-border);
@@ -634,7 +644,7 @@ export default function ClientDashboard() {
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .cd-job-meta  { font-size: 0.78rem; color: var(--cd-muted); margin-bottom: 0.9rem; font-weight: 400; }
+        .cd-job-meta { font-size: 0.78rem; color: var(--cd-muted); margin-bottom: 0.9rem; font-weight: 400; }
 
         .cd-btn-open {
           display: inline-flex;
@@ -652,7 +662,6 @@ export default function ClientDashboard() {
         }
         .cd-btn-open:hover { background: #f5edcd; color: #5a4010; }
 
-        /* Dropdown */
         .cd-job-menu-wrap { position: relative; flex-shrink: 0; }
         .cd-job-menu {
           background: none;
@@ -699,7 +708,6 @@ export default function ClientDashboard() {
         .cd-dropdown-item.is-danger { color: var(--cd-danger); }
         .cd-dropdown-item.is-danger:hover { background: #fff5f5; }
 
-        /* Stats row */
         .cd-job-stats {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -714,6 +722,8 @@ export default function ClientDashboard() {
           gap: 0.2rem;
           padding: 0.25rem 0.1rem;
           border-right: 1px solid var(--cd-border);
+          border-radius: 6px;
+          transition: background 0.15s;
         }
         .cd-stat:last-child { border-right: none; }
         .cd-stat-val {
@@ -730,7 +740,6 @@ export default function ClientDashboard() {
           font-weight: 500;
         }
 
-        /* Post job card */
         .cd-post-job-card {
           background: var(--cd-surface);
           border: 2px dashed #d6d0c4;
@@ -769,7 +778,6 @@ export default function ClientDashboard() {
         }
         .cd-post-job-card:hover .cd-post-job-plus { background: rgba(201,168,76,0.2); }
 
-        /* Skeleton */
         .cd-skeleton {
           background: linear-gradient(90deg, #eae8e4 25%, #f2f0ec 50%, #eae8e4 75%);
           background-size: 200% 100%;
@@ -780,7 +788,6 @@ export default function ClientDashboard() {
           100% { background-position: -200% 0; }
         }
 
-        /* Error */
         .cd-error {
           background: #fff5f5;
           border: 1px solid #f5c6c6;
@@ -794,7 +801,6 @@ export default function ClientDashboard() {
           gap: 0.5rem;
         }
 
-        /* ── Modal ── */
         .cd-modal-overlay {
           position: fixed;
           inset: 0;
@@ -884,7 +890,6 @@ export default function ClientDashboard() {
           text-align: center;
         }
 
-        /* Responsive tweaks */
         @media (max-width: 520px) {
           .cd-main { padding: 1.5rem 1rem 4rem; }
           .cd-job-stats { grid-template-columns: repeat(2, 1fr); }
@@ -896,7 +901,7 @@ export default function ClientDashboard() {
 
       <main className="cd-main">
 
-        {/* ── Welcome ── */}
+        {/* Welcome */}
         <div className="cd-welcome">
           <div>
             <h1 className="cd-welcome-title">
@@ -911,7 +916,7 @@ export default function ClientDashboard() {
           <a href="/client/post-job" className="cd-btn-primary">+ Post a job</a>
         </div>
 
-        {/* ── Onboarding Steps ── */}
+        {/* Onboarding Steps */}
         <h3 className="cd-section-title">Last steps before you can hire</h3>
         <div className="cd-steps-grid">
           {loading || !stepCards
@@ -920,7 +925,7 @@ export default function ClientDashboard() {
           }
         </div>
 
-        {/* ── Overview ── */}
+        {/* Overview */}
         <div className="cd-overview-header">
           <h3 className="cd-section-title" style={{ marginBottom: 0 }}>Overview</h3>
           <div className="cd-toggle-group">
@@ -941,7 +946,11 @@ export default function ClientDashboard() {
 
         {error && (
           <div className="cd-error">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             Could not load your dashboard: {error}
           </div>
         )}
@@ -965,7 +974,7 @@ export default function ClientDashboard() {
 
       </main>
 
-      {/* ── Edit Modal ── */}
+      {/* Edit Modal */}
       {editingJob && (
         <EditJobModal
           job={editingJob}
@@ -974,7 +983,7 @@ export default function ClientDashboard() {
         />
       )}
 
-      {/* ── Delete Confirm Modal ── */}
+      {/* Delete Confirm Modal */}
       {deletingJob && (
         <DeleteConfirmModal
           job={deletingJob}

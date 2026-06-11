@@ -6,7 +6,7 @@ const MainLayout = () => {
   const { user } = useAuth();
 
   return (
-    <div className="main-layout bg-[#f8f9fa] min-height-screen">
+    <div className="main-layout min-h-screen">
       <Navbar role="client" user={user} />
       <main>
         <Outlet />

@@ -5,6 +5,7 @@ import SignUpPage from '../features/auth/pages/SignUpPage';
 import LoginPage from '../features/auth/pages/LoginPage';
 import ClientDashboard from '../features/dashboard/pages/ClientDashboard';
 import { PostJobPage } from '../features/jobs';
+import JobProposalsPage from '../features/jobs/pages/JobProposalsPage';  // ← only new line added
 import SettingsPage from '../features/account/pages/SettingsPage';
 import SearchTalentPage from '../features/talent/SearchTalentPage';
 import FreelancerDetailsPage from '../features/talent/FreelancerDetailsPage';
@@ -26,6 +27,7 @@ const AppRoutes = () => {
           <Route path="/client/settings" element={<SettingsPage />} />
           <Route path="/client/search-talent" element={<SearchTalentPage />} />
           <Route path="/client/freelancer/:id" element={<FreelancerDetailsPage />} />
+          <Route path="/client/job-proposals" element={<JobProposalsPage />} />  
           <Route path="/client/SearchTalentPage" element={<Navigate to="/client/search-talent" replace />} />
         </Route>
       </Route>

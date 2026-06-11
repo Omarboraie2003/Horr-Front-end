@@ -30,6 +30,7 @@ export const ENDPOINTS = {
     LIST: '/Jobs/jobs',
     UPDATE: '/Jobs/update-job',
     DELETE: '/Jobs/delete-job',
+    CLIENT_PROPOSALS: '/client/proposals', 
   },
   
   CATEGORIES: '/Categories',

@@ -122,3 +122,9 @@ export const getUserPaymentMethods = async () => {
   const response = await apiClient.get(ENDPOINTS.USER_PROFILE.BASE);
   return response.data?.data?.paymentMethods || [];
 };
+
+// Proposals
+export const getClientProposals = async () => {
+  const response = await apiClient.get(ENDPOINTS.JOBS.CLIENT_PROPOSALS);
+  return response.data;
+};
