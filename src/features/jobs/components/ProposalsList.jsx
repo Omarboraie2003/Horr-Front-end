@@ -1,6 +1,6 @@
 import ProposalCard from './ProposalCard';
 
-const ProposalsList = ({ proposals, onAccept, onReject }) => {
+const ProposalsList = ({ proposals, onAccept, onReject, isHistory }) => {
   if (!proposals || proposals.length === 0) {
     return (
       <div style={{
@@ -16,10 +16,12 @@ const ProposalsList = ({ proposals, onAccept, onReject }) => {
           color: '#1a1a1a',
           margin: '0 0 8px',
         }}>
-          No proposals yet
+          {isHistory ? 'No history yet' : 'No proposals yet'}
         </p>
         <p style={{ fontSize: '14px', color: '#888', margin: 0 }}>
-          When freelancers apply to your jobs, their proposals will appear here.
+          {isHistory
+            ? 'Accepted and rejected proposals will appear here.'
+            : 'When freelancers apply to your jobs, their proposals will appear here.'}
         </p>
       </div>
     );
@@ -98,6 +100,7 @@ const ProposalsList = ({ proposals, onAccept, onReject }) => {
               proposal={proposal}
               onAccept={onAccept}
               onReject={onReject}
+              isHistory={isHistory}
             />
           ))}
 

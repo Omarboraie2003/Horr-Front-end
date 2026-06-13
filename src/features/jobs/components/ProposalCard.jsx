@@ -1,9 +1,9 @@
 const statusStyles = {
   Active:    { background: '#EAF3DE', color: '#3B6D11' },
-  Submitted: { background: '#EAF3DE', color: '#3B6D11' },
-  Pending:   { background: '#FAEEDA', color: '#633806' },
-  Withdrawn: { background: '#F1EFE8', color: '#5F5E5A' },
+  Submitted: { background: '#FAEEDA', color: '#633806' },
+  Offer:     { background: '#E8F4FD', color: '#1565C0' },
   Rejected:  { background: '#FCEBEB', color: '#A32D2D' },
+  Withdrawn: { background: '#F1EFE8', color: '#5F5E5A' },
 };
 
 const getInitials = (name) => {
@@ -21,19 +21,21 @@ const formatDate = (dateStr) => {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 };
 
-const ProposalCard = ({ proposal, onAccept, onReject }) => {
+const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
   const { freelancerName, bidRate, coverLetter, status, createdAt } = proposal;
   const badge = statusStyles[status] || statusStyles.Active;
 
   return (
-    <div style={{
-      background: '#ffffff',
-      border: '1px solid #e8e8e8',
-      borderRadius: '14px',
-      padding: '2rem 2.25rem',
-      marginBottom: '1.25rem',
-      transition: 'box-shadow 0.2s',
-    }}
+    <div
+      style={{
+        background: '#ffffff',
+        border: '1px solid #e8e8e8',
+        borderRadius: '14px',
+        padding: '2rem 2.25rem',
+        marginBottom: '1.25rem',
+        transition: 'box-shadow 0.2s',
+        opacity: isHistory ? 0.85 : 1,
+      }}
       onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.07)'}
       onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
     >
@@ -62,12 +64,7 @@ const ProposalCard = ({ proposal, onAccept, onReject }) => {
             {getInitials(freelancerName)}
           </div>
           <div>
-            <p style={{
-              fontSize: '17px',
-              fontWeight: '600',
-              color: '#1a1a1a',
-              margin: '0 0 4px',
-            }}>
+            <p style={{ fontSize: '17px', fontWeight: '600', color: '#1a1a1a', margin: '0 0 4px' }}>
               {freelancerName}
             </p>
             <p style={{ fontSize: '13px', color: '#999', margin: 0 }}>
@@ -107,7 +104,7 @@ const ProposalCard = ({ proposal, onAccept, onReject }) => {
         fontSize: '14px',
         color: '#555',
         lineHeight: '1.75',
-        margin: '0 0 1.75rem',
+        margin: isHistory ? '0' : '0 0 1.75rem',
         display: '-webkit-box',
         WebkitLineClamp: 2,
         WebkitBoxOrient: 'vertical',
@@ -116,57 +113,59 @@ const ProposalCard = ({ proposal, onAccept, onReject }) => {
         {coverLetter}
       </p>
 
-      {/* Action buttons */}
-      <div style={{
-        display: 'flex',
-        gap: '12px',
-        justifyContent: 'flex-end',
-        borderTop: '1px solid #f0f0f0',
-        paddingTop: '1.25rem',
-      }}>
-        <button
-          onClick={() => onReject(proposal)}
-          style={{
-            padding: '9px 24px',
-            borderRadius: '8px',
-            fontSize: '14px',
-            cursor: 'pointer',
-            border: '1px solid #e0e0e0',
-            background: '#ffffff',
-            color: '#555',
-            fontWeight: '500',
-            transition: 'background 0.15s, border-color 0.15s',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = '#f7f7f5';
-            e.currentTarget.style.borderColor = '#ccc';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = '#ffffff';
-            e.currentTarget.style.borderColor = '#e0e0e0';
-          }}
-        >
-          Reject proposal
-        </button>
-        <button
-          onClick={() => onAccept(proposal)}
-          style={{
-            padding: '9px 24px',
-            borderRadius: '8px',
-            fontSize: '14px',
-            cursor: 'pointer',
-            border: '1px solid #B7A06A',
-            background: '#B7A06A',
-            color: '#fff',
-            fontWeight: '500',
-            transition: 'background 0.15s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = '#a08d5a'}
-          onMouseLeave={e => e.currentTarget.style.background = '#B7A06A'}
-        >
-          Accept proposal
-        </button>
-      </div>
+      {/* Action buttons — hidden in history tab */}
+      {!isHistory && (
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          justifyContent: 'flex-end',
+          borderTop: '1px solid #f0f0f0',
+          paddingTop: '1.25rem',
+        }}>
+          <button
+            onClick={() => onReject(proposal)}
+            style={{
+              padding: '9px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              border: '1px solid #e0e0e0',
+              background: '#ffffff',
+              color: '#555',
+              fontWeight: '500',
+              transition: 'background 0.15s, border-color 0.15s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = '#f7f7f5';
+              e.currentTarget.style.borderColor = '#ccc';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = '#ffffff';
+              e.currentTarget.style.borderColor = '#e0e0e0';
+            }}
+          >
+            Reject proposal
+          </button>
+          <button
+            onClick={() => onAccept(proposal)}
+            style={{
+              padding: '9px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer',
+              border: '1px solid #B7A06A',
+              background: '#B7A06A',
+              color: '#fff',
+              fontWeight: '500',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.background = '#a08d5a'}
+            onMouseLeave={e => e.currentTarget.style.background = '#B7A06A'}
+          >
+            Accept proposal
+          </button>
+        </div>
+      )}
     </div>
   );
 };

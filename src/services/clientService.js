@@ -128,3 +128,20 @@ export const getClientProposals = async () => {
   const response = await apiClient.get(ENDPOINTS.JOBS.CLIENT_PROPOSALS);
   return response.data;
 };
+
+// Proposals actions
+export const rejectProposal = async (proposalId) => {
+  const url = ENDPOINTS.PROPOSALS.REJECT.replace('{id}', proposalId);
+  const response = await apiClient.post(url);
+  return response.data;
+};
+
+export const createOffer = async ({ freelancerId, proposalId, agreedRate, jobDescription }) => {
+  const response = await apiClient.post(ENDPOINTS.PROPOSALS.CREATE_OFFER, {
+    freelancerId,
+    proposalId,
+    agreedRate,
+    jobDescription,
+  });
+  return response.data;
+};

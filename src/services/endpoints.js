@@ -46,5 +46,10 @@ export const ENDPOINTS = {
     unsaveFreelancer: '/client/freelancers/{freelancerId}/unsave',
   },
 
+  PROPOSALS: {
+  REJECT: '/Proposals/{id}/reject',
+  CREATE_OFFER: '/Contracts/create-offer',
+},
+
 
 };
