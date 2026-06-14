@@ -64,11 +64,12 @@ const JobProposalsPage = () => {
     setActionLoading(true);
     try {
       await createOffer({
-        freelancerId: acceptingProposal.freelancerId,
-        proposalId: acceptingProposal.id,
-        agreedRate,
-        jobDescription,
-      });
+       freelancerId: acceptingProposal.freelancerId,
+       proposalId: acceptingProposal.id,
+       jobPostId: acceptingProposal.jobPostId,
+       agreedRate,
+       jobDescription,
+    });
       setProposals((prev) =>
         prev.map((p) =>
           p.id === acceptingProposal.id ? { ...p, status: 'Accepted' } : p

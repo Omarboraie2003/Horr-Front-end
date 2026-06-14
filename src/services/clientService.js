@@ -136,10 +136,11 @@ export const rejectProposal = async (proposalId) => {
   return response.data;
 };
 
-export const createOffer = async ({ freelancerId, proposalId, agreedRate, jobDescription }) => {
+export const createOffer = async ({ freelancerId, proposalId, jobPostId, agreedRate, jobDescription }) => {
   const response = await apiClient.post(ENDPOINTS.PROPOSALS.CREATE_OFFER, {
     freelancerId,
     proposalId,
+    jobPostId,
     agreedRate,
     jobDescription,
   });
