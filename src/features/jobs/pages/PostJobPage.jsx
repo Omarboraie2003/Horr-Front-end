@@ -10,6 +10,7 @@ import StepScope      from "../components/StepScope";
 import StepBudget     from "../components/StepBudget";
 import StepDescription from "../components/StepDescription";
 import StepReview     from "../components/StepReview";
+import RecommendedFreelancers from "../../talent/components/RecommendedFreelancers";
 
 /**
  * PostJob — Brain of the wizard
@@ -92,6 +93,7 @@ export default function PostJobPage() {
   const [submitting,      setSubmitting]      = useState(false);
   const [error,           setError]           = useState(null);
   const [skillInput,      setSkillInput]      = useState("");
+  const [posted,          setPosted]          = useState(false);
 
   // All form data — update keys to match BE request body when available
   const [jobData, setJobData] = useState({
@@ -205,7 +207,7 @@ export default function PostJobPage() {
 
         await createJob(payload);
         toast.success("Your job post is now live!");
-        navigate("/client/dashboard");
+        setPosted(true);
       } catch (e) {
         console.error("Submit Error:", e);
         setError(e.response?.data?.message || "Failed to post job. Please try again.");
@@ -224,6 +226,54 @@ export default function PostJobPage() {
     setStep((s) => Math.max(s - 1, 1));
     window.scrollTo(0, 0);
   };
+
+  // ── Success screen ────────────────────────────────────────────────────
+  if (posted) {
+    return (
+      <>
+        <style>{`
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+          body {
+            background: #f9f9f9;
+            color: #1a1a1a;
+            font-family: 'DM Sans', system-ui, sans-serif;
+            min-height: 100vh;
+          }
+
+          .pj-success-wrap { max-width: 820px; margin: 0 auto; padding: 4rem 1.5rem 5rem; text-align: center; }
+          .pj-success-icon { width: 64px; height: 64px; border-radius: 50%; background: #f0faf0; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+          .pj-success-title { font-size: 1.6rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.5rem; }
+          .pj-success-sub { color: #888; font-size: 0.95rem; margin-bottom: 3rem; }
+          .pj-success-actions { margin-top: 1rem; }
+          .pj-btn-dashboard { display: inline-flex; align-items: center; gap: 0.4rem; background: linear-gradient(135deg, #C9A84C, #E5C97A); color: #fff; border: none; padding: 0.7rem 1.6rem; border-radius: 8px; font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.15s, transform 0.15s; }
+          .pj-btn-dashboard:hover { opacity: 0.9; transform: translateY(-1px); }
+        `}</style>
+
+        <div className="pj-success-wrap">
+          <div className="pj-success-icon">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <h1 className="pj-success-title">Your job has been posted!</h1>
+          <p className="pj-success-sub">
+            Here are some freelancers we think would be a great fit.
+          </p>
+
+          <div style={{ textAlign: 'left', marginBottom: '2rem' }}>
+            <RecommendedFreelancers title="Recommended for this job" />
+          </div>
+
+          <div className="pj-success-actions">
+            <button className="pj-btn-dashboard" onClick={() => navigate("/client/dashboard")}>
+              Go to dashboard
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

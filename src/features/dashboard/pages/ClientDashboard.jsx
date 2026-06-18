@@ -4,6 +4,7 @@ import { getOnboardingStatus, getClientJobs, updateJob, deleteJob } from "../../
 import useAuth from "../../auth/hooks/useAuth";
 import useFetch from "../../../hooks/useFetch";
 import { toast } from "sonner";
+import RecommendedFreelancers from "../../talent/components/RecommendedFreelancers";
 
 // ── Step Card ─────────────────────────────────────────────────────────────────
 function StepCard({ step }) {
@@ -924,6 +925,9 @@ export default function ClientDashboard() {
             : stepCards.map((step) => <StepCard key={step.id} step={step} />)
           }
         </div>
+
+        {/* Recommended Freelancers */}
+          <RecommendedFreelancers />
 
         {/* Overview */}
         <div className="cd-overview-header">

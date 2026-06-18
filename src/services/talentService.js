@@ -79,3 +79,13 @@ export const unsaveFreelancer = async (freelancerId) => {
     throw error;
   }
 };
+
+export const getRecommendedFreelancers = async () => {
+  try {
+    const response = await apiClient.get(ENDPOINTS.TALENT.recommendedFreelancers);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching recommended freelancers:", error);
+    throw error;
+  }
+};
