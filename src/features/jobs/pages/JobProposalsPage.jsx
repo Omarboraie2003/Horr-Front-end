@@ -93,10 +93,28 @@ const JobProposalsPage = () => {
     ? proposals.filter((p) => p.jobPostId === jobId)
     : proposals;
 
-const activeProposals = filtered.filter((p) => p.status === 'Active' || p.status === 'Submitted');
-const historyProposals = filtered.filter((p) => p.status === 'Offer' || p.status === 'Rejected' || p.status === 'Withdrawn');
+  const activeProposals = filtered.filter((p) => {
+    const s = String(p.status ?? p.Status).toLowerCase();
+    return s === 'active' || s === '1';
+  });
 
-  const displayed = activeTab === 'active' ? activeProposals : historyProposals;
+  const sentProposals = filtered.filter((p) => {
+    const s = String(p.status ?? p.Status).toLowerCase();
+    return s === 'pending' || s === 'sent' || s === '0';
+  });
+
+  const historyProposals = filtered.filter((p) => {
+    const s = String(p.status ?? p.Status).toLowerCase();
+    const isActive = s === 'active' || s === '1';
+    const isSent = s === 'pending' || s === 'sent' || s === '0';
+    return !isActive && !isSent;
+  });
+
+  let displayed = [];
+  if (activeTab === 'active') displayed = activeProposals;
+  else if (activeTab === 'sent') displayed = sentProposals;
+  else displayed = historyProposals;
+
   const totalCount = displayed.length;
 
   return (
@@ -132,26 +150,30 @@ const historyProposals = filtered.filter((p) => p.status === 'Offer' || p.status
         borderBottom: '1px solid #e8e8e8',
         marginBottom: '1.75rem',
       }}>
-        {['active', 'history'].map((tab) => (
+        {[
+          { id: 'active', label: `Active (${activeProposals.length})` },
+          { id: 'sent', label: `Sent Offers (${sentProposals.length})` },
+          { id: 'history', label: `History (${historyProposals.length})` }
+        ].map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
             style={{
               padding: '0.6rem 1.25rem',
               fontSize: '14px',
-              fontWeight: activeTab === tab ? '600' : '400',
-              color: activeTab === tab ? '#B7A06A' : '#888',
+              fontWeight: activeTab === tab.id ? '600' : '400',
+              color: activeTab === tab.id ? '#B7A06A' : '#888',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === tab ? '2px solid #B7A06A' : '2px solid transparent',
+              borderBottom: activeTab === tab.id ? '2px solid #B7A06A' : '2px solid transparent',
               cursor: 'pointer',
               fontFamily: 'inherit',
               marginBottom: '-1px',
-              textTransform: 'capitalize',
+              textTransform: 'none',
               transition: 'color 0.15s',
             }}
           >
-            {tab === 'active' ? `Active (${activeProposals.length})` : `History (${historyProposals.length})`}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -164,6 +186,12 @@ const historyProposals = filtered.filter((p) => p.status === 'Offer' || p.status
       ) : error ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-danger)', fontSize: '14px' }}>
           {error}
+        </div>
+      ) : displayed.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-secondary)', fontSize: '14px' }}>
+          {activeTab === 'active' && "No active proposals found."}
+          {activeTab === 'sent' && "No pending offers sent to freelancers yet."}
+          {activeTab === 'history' && "No proposal history available."}
         </div>
       ) : (
         <ProposalsList
