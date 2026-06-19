@@ -146,3 +146,31 @@ export const createOffer = async ({ freelancerId, proposalId, jobPostId, agreedR
   });
   return response.data;
 };
+
+// Job Invitations
+
+export const sendJobInvitation = async ({ jobPostId, freelancerId, message }) => {
+  const response = await apiClient.post(ENDPOINTS.JOB_INVITATIONS.BASE, {
+    jobPostId,
+    freelancerId,
+    message,
+  });
+  return response.data;
+};
+
+export const withdrawJobInvitation = async (invitationId) => {
+  const response = await apiClient.post(ENDPOINTS.JOB_INVITATIONS.WITHDRAW.replace('{id}', invitationId));
+  return response.data;
+};
+
+export const getClientInvitations = async (jobPostId = null) => {
+  const response = await apiClient.get(ENDPOINTS.JOB_INVITATIONS.CLIENT, {
+    params: jobPostId ? { jobPostId } : undefined,
+  });
+  return response.data;
+};
+
+export const getInvitationDetails = async (invitationId) => {
+  const response = await apiClient.get(ENDPOINTS.JOB_INVITATIONS.DETAIL.replace('{id}', invitationId));
+  return response.data;
+};
