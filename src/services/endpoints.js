@@ -37,7 +37,7 @@ export const ENDPOINTS = {
   SKILLS: '/Skills',
 
   CONVERSATIONS: {
-    SEND_MESSAGE: '/Conversations/{conversationId}/messages',
+    SEND_MESSAGE: '/chat/{conversationId}/messages/text',
   },
 
   TALENT: {
@@ -51,6 +51,15 @@ export const ENDPOINTS = {
   REJECT: '/Proposals/{id}/reject',
   CREATE_OFFER: '/Contracts/create-offer',
 },
+
+  JOB_INVITATIONS: {
+    BASE: '/jobinvitations',
+    WITHDRAW: '/jobinvitations/{id}/withdraw',
+    ACCEPT: '/jobinvitations/{id}/accept',
+    DECLINE: '/jobinvitations/{id}/decline',
+    DETAIL: '/jobinvitations/{id}',
+    CLIENT: '/jobinvitations/client',
+    FREELANCER: '/jobinvitations/freelancer',
   CONTRACTS: {
     MY_CONTRACTS: '/api/contracts/my-contracts',
     GET_CONTRACT: (id) => `/api/contracts/${id}`,

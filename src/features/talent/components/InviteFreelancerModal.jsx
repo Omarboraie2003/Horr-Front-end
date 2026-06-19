@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { getClientJobs, sendConversationMessage } from '../../../services/clientService';
+import { getClientJobs, sendJobInvitation } from '../../../services/clientService';
 
 const InviteFreelancerModal = ({ freelancer, onClose }) => {
   const [jobs, setJobs] = useState([]);
@@ -51,10 +51,10 @@ const InviteFreelancerModal = ({ freelancer, onClose }) => {
     setSuccess('');
 
     try {
-      await sendConversationMessage(`temp-${freelancer.userId}`, {
-        body: message,
+      await sendJobInvitation({
         jobPostId: selectedJobId,
-        receiverId: freelancer.userId,
+        freelancerId: freelancer.userId,
+        message: message,
       });
       setSuccess('Invitation sent successfully.');
       toast.success('Invitation sent successfully.');
