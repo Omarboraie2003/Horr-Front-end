@@ -8,7 +8,7 @@ import {
   clearSelectedFreelancer,
 } from "./talentSlice";
 import { mapFreelancerDetails } from "./freelancerDetailsMapper";
-import { getClientJobs, sendConversationMessage } from "../../services/clientService";
+import { getClientJobs, sendConversationMessage, sendJobInvitation } from "../../services/clientService";
 import FreelancerHeaderCard from "./components/FreelancerHeaderCard";
 import FreelancerMainInfoCard from "./components/FreelancerMainInfoCard";
 import FreelancerDetailsSidebarCard from "./components/FreelancerDetailsSidebarCard";
@@ -137,10 +137,10 @@ export default function FreelancerDetailsPage() {
     setInviteSuccess("");
 
     try {
-      await sendConversationMessage(`temp-${freelancer.id}`, {
-        body: message,
+      await sendJobInvitation({
         jobPostId: selectedJobId,
-        receiverId: freelancer.id,
+        freelancerId: freelancer.id,
+        message: message,
       });
       setInviteSuccess("Invitation sent successfully.");
       toast.success("Invitation sent successfully.");
