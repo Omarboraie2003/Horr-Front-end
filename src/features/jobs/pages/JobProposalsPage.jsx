@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getClientProposals, rejectProposal, createOffer } from '../../../services/clientService';
+import { getClientProposals, revokeOffer, createOffer } from '../../../services/clientService';
 import ProposalsList from '../components/ProposalsList';
 import RejectConfirmModal from '../components/RejectConfirmModal';
 import CreateOfferModal from '../components/CreateOfferModal';
@@ -38,13 +38,13 @@ const JobProposalsPage = () => {
   const handleRejectConfirm = async () => {
     setActionLoading(true);
     try {
-      await rejectProposal(rejectingProposal.id);
+      await revokeOffer(rejectingProposal.id);
       setProposals((prev) =>
         prev.map((p) =>
-          p.id === rejectingProposal.id ? { ...p, status: 'Rejected' } : p
+          p.id === rejectingProposal.id ? { ...p, status: 'Revoked' } : p
         )
       );
-      toast.success('Proposal rejected successfully');
+      toast.success('Offer revoked successfully');
       setRejectingProposal(null);
     } catch (err) {
       const status = err.response?.status;
