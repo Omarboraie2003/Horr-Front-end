@@ -8,6 +8,7 @@ import { PostJobPage } from '../features/jobs';
 import JobProposalsPage from '../features/jobs/pages/JobProposalsPage';  // ← only new line added
 import SettingsPage from '../features/account/pages/SettingsPage';
 import SearchTalentPage from '../features/talent/SearchTalentPage';
+import SavedTalentPage from '../features/talent/SavedTalentPage';
 import FreelancerDetailsPage from '../features/talent/FreelancerDetailsPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 
@@ -26,6 +27,7 @@ const AppRoutes = () => {
           <Route path="/client/post-job" element={<PostJobPage />} />
           <Route path="/client/settings" element={<SettingsPage />} />
           <Route path="/client/search-talent" element={<SearchTalentPage />} />
+          <Route path="/client/saved-talent" element={<SavedTalentPage />} />
           <Route path="/client/freelancer/:id" element={<FreelancerDetailsPage />} />
           <Route path="/client/job-proposals" element={<JobProposalsPage />} />  
           <Route path="/client/SearchTalentPage" element={<Navigate to="/client/search-talent" replace />} />

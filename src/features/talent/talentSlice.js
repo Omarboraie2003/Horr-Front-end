@@ -4,6 +4,7 @@ import {
   saveFreelancer,
   unsaveFreelancer,
   getPublicFreelancerProfile,
+  getSavedFreelancers,
 } from "../../services/talentService";
 
 export const fetchTalents = createAsyncThunk(
@@ -52,6 +53,20 @@ export const toggleSaveFreelancer = createAsyncThunk(
   }
 );
 
+export const fetchSavedTalents = createAsyncThunk(
+  "talent/fetchSavedTalents",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const data = await getSavedFreelancers(params);
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch saved talents"
+      );
+    }
+  }
+);
+
 const initialState = {
   talents: [],
   loading: false,
@@ -68,6 +83,17 @@ const initialState = {
     hasPreviousPage: false,
   },
   searchParams: {},
+  savedTalents: [],
+  savedLoading: false,
+  savedError: null,
+  savedPagination: {
+    page: 1,
+    pageSize: 10,
+    totalCount: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  },
 };
 
 const talentSlice = createSlice({
@@ -93,6 +119,11 @@ const talentSlice = createSlice({
     clearSelectedFreelancer: (state) => {
       state.selectedFreelancer = null;
       state.detailsError = null;
+    },
+    clearSavedTalents: (state) => {
+      state.savedTalents = [];
+      state.savedError = null;
+      state.savedPagination = initialState.savedPagination;
     },
   },
   extraReducers: (builder) => {
@@ -155,9 +186,52 @@ const talentSlice = createSlice({
         if (state.selectedFreelancer?.userIdHash === freelancerId) {
           state.selectedFreelancer.isSaved = isSaved;
         }
+        if (!isSaved) {
+          state.savedTalents = state.savedTalents.filter((t) => t.id !== freelancerId);
+          if (state.savedPagination.totalCount > 0) {
+            state.savedPagination.totalCount -= 1;
+          }
+        } else {
+          const savedTalent = state.savedTalents.find((t) => t.id === freelancerId);
+          if (!savedTalent) {
+            const originTalent = state.talents.find((t) => t.id === freelancerId);
+            if (originTalent) {
+              state.savedTalents.push({ ...originTalent, isSaved: true });
+              state.savedPagination.totalCount += 1;
+            }
+          }
+        }
       })
       .addCase(toggleSaveFreelancer.rejected, (state, action) => {
         state.error = action.payload;
+      });
+
+    builder
+      .addCase(fetchSavedTalents.pending, (state) => {
+        state.savedLoading = true;
+        state.savedError = null;
+      })
+      .addCase(fetchSavedTalents.fulfilled, (state, action) => {
+        state.savedLoading = false;
+        const page = action.meta?.arg?.page || 1;
+        const items = action.payload.items || [];
+        if (page > 1) {
+          state.savedTalents = [...state.savedTalents, ...items];
+        } else {
+          state.savedTalents = items;
+        }
+        state.savedPagination = {
+          page: action.payload.page || page,
+          pageSize: action.payload.pageSize || 10,
+          totalCount: action.payload.totalCount || 0,
+          totalPages: action.payload.totalPages || 0,
+          hasNextPage: action.payload.hasNextPage || false,
+          hasPreviousPage: action.payload.hasPreviousPage || false,
+        };
+      })
+      .addCase(fetchSavedTalents.rejected, (state, action) => {
+        state.savedLoading = false;
+        state.savedError = action.payload;
       });
   },
 });
@@ -168,5 +242,6 @@ export const {
   setSearchParams,
   clearTalents,
   clearSelectedFreelancer,
+  clearSavedTalents,
 } = talentSlice.actions;
 export default talentSlice.reducer;

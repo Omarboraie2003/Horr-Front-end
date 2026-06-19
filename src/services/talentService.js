@@ -80,6 +80,25 @@ export const unsaveFreelancer = async (freelancerId) => {
   }
 };
 
+export const getSavedFreelancers = async (params = {}) => {
+  const defaults = {
+    page: 1,
+    pageSize: 10,
+  };
+
+  const queryParams = { ...defaults, ...params };
+
+  try {
+    const response = await apiClient.get(ENDPOINTS.TALENT.getSavedFreelancers, {
+      params: queryParams,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching saved freelancers:", error);
+    throw error;
+  }
+};
+
 export const getRecommendedFreelancers = async () => {
   try {
     const response = await apiClient.get(ENDPOINTS.TALENT.recommendedFreelancers);
@@ -89,3 +108,4 @@ export const getRecommendedFreelancers = async () => {
     throw error;
   }
 };
+

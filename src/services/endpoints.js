@@ -44,7 +44,8 @@ export const ENDPOINTS = {
     searchFreelancers: '/client/freelancers/search',
     saveFreelancer: '/client/freelancers/{freelancerId}/save',
     unsaveFreelancer: '/client/freelancers/{freelancerId}/unsave',
-     recommendedFreelancers: '/Recommendations/freelancers',
+    getSavedFreelancers: '/client/freelancers/saved',
+    recommendedFreelancers: '/Recommendations/freelancers',
   },
 
   PROPOSALS: {
