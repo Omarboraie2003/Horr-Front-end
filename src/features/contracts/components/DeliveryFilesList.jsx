@@ -13,7 +13,8 @@ export default function DeliveryFilesList({ attachments = [], onDownload }) {
   const handleDownload = (e, file) => {
     e.preventDefault();
     if (onDownload) {
-      onDownload(file.id, file.name);
+      const fileName = file.name || file.originalFileName || file.fileName || 'Attachment';
+      onDownload(file.id, fileName);
     }
   };
 
@@ -24,7 +25,9 @@ export default function DeliveryFilesList({ attachments = [], onDownload }) {
       </h4>
       <div className="flex flex-col gap-2">
         {attachments.map((item, idx) => {
-          const isFile = item.type === 'FILE';
+          const isFile = item.type !== 'LINK';
+          const displayName = item.name || item.originalFileName || item.fileName || 'Attachment';
+          const itemUrl = item.url || item.fileUrl || '#';
           
           return (
             <div
@@ -38,7 +41,7 @@ export default function DeliveryFilesList({ attachments = [], onDownload }) {
                   <LinkIcon className="h-5 w-5 text-emerald-500 flex-shrink-0" />
                 )}
                 <span className="text-sm font-medium text-gray-700 truncate max-w-[280px] sm:max-w-md">
-                  {item.name}
+                  {displayName}
                 </span>
               </div>
               
@@ -53,7 +56,7 @@ export default function DeliveryFilesList({ attachments = [], onDownload }) {
                   </button>
                 ) : (
                   <a
-                    href={item.url}
+                    href={itemUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1.5 text-gray-400 hover:text-emerald-600 rounded-md hover:bg-emerald-50 transition-colors"
