@@ -95,18 +95,18 @@ const JobProposalsPage = () => {
 
   const activeProposals = filtered.filter((p) => {
     const s = String(p.status ?? p.Status).toLowerCase();
-    return s === 'active' || s === '1';
+    return ['active', 'accepted', 'approved', '1'].includes(s);
   });
 
   const sentProposals = filtered.filter((p) => {
     const s = String(p.status ?? p.Status).toLowerCase();
-    return s === 'pending' || s === 'sent' || s === '0';
+    return ['pending', 'sent', 'offer', '0'].includes(s);
   });
 
   const historyProposals = filtered.filter((p) => {
     const s = String(p.status ?? p.Status).toLowerCase();
-    const isActive = s === 'active' || s === '1';
-    const isSent = s === 'pending' || s === 'sent' || s === '0';
+    const isActive = ['active', 'accepted', 'approved', '1'].includes(s);
+    const isSent = ['pending', 'sent', 'offer', '0'].includes(s);
     return !isActive && !isSent;
   });
 

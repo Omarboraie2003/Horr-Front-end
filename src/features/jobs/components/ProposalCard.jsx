@@ -25,6 +25,9 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
   const { freelancerName, bidRate, coverLetter, status, createdAt } = proposal;
   const badge = statusStyles[status] || statusStyles.Active;
 
+  const s = String(status).toLowerCase();
+  const isSentOffer = ['pending', 'sent', 'offer', '0'].includes(s);
+
   return (
     <div
       style={{
@@ -113,8 +116,8 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
         {coverLetter}
       </p>
 
-      {/* Action buttons — hidden in history tab */}
-      {!isHistory && (
+      {/* Action buttons — only for sent offers */}
+      {!isHistory && isSentOffer && (
         <div style={{
           display: 'flex',
           gap: '12px',
@@ -144,7 +147,7 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
               e.currentTarget.style.borderColor = '#e0e0e0';
             }}
           >
-            Reject proposal
+            Reject
           </button>
           <button
             onClick={() => onAccept(proposal)}
@@ -162,7 +165,7 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
             onMouseEnter={e => e.currentTarget.style.background = '#a08d5a'}
             onMouseLeave={e => e.currentTarget.style.background = '#B7A06A'}
           >
-            Accept proposal
+            Accept
           </button>
         </div>
       )}
