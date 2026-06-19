@@ -60,5 +60,23 @@ export const ENDPOINTS = {
     DETAIL: '/jobinvitations/{id}',
     CLIENT: '/jobinvitations/client',
     FREELANCER: '/jobinvitations/freelancer',
+  CONTRACTS: {
+    MY_CONTRACTS: '/api/contracts/my-contracts',
+    GET_CONTRACT: (id) => `/api/contracts/${id}`,
+    SUBMIT_REVIEW: (id) => `/api/contracts/${id}/reviews`,
+  },
+  DELIVERIES: {
+    GET_BY_CONTRACT: '/api/deliveries',
+    APPROVE: (id) => `/api/deliveries/${id}/approve`,
+    REVISION: (id) => `/api/deliveries/${id}/revision`,
+    DISPUTE: (id) => `/api/deliveries/${id}/dispute`,
+    DOWNLOAD: (id) => `/api/deliveries/attachments/${id}/download`,
+  },
+  CHAT: {
+    LIST: '/api/chat',
+    MESSAGES: (chatId) => `/api/chat/${chatId}/messages`,
+    SEND_TEXT: (chatId) => `/api/chat/${chatId}/messages/text`,
+    SEND_FILE: (chatId) => `/api/chat/${chatId}/messages/file`,
+    BY_CONTRACT: (contractId) => `/api/chat/by-contract/${contractId}`,
   },
 };

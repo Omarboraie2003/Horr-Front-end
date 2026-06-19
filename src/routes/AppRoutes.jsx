@@ -10,6 +10,10 @@ import SettingsPage from '../features/account/pages/SettingsPage';
 import SearchTalentPage from '../features/talent/SearchTalentPage';
 import FreelancerDetailsPage from '../features/talent/FreelancerDetailsPage';
 import ProtectedRoute from '../components/ProtectedRoute';
+import MyContractsPage from '../features/contracts/pages/MyContractsPage';
+import ContractDetailsPage from '../features/contracts/pages/ContractDetailsPage';
+import ClientDeliveryPortalPage from '../features/contracts/pages/ClientDeliveryPortalPage';
+import MessagesPage from '../features/chat/pages/MessagesPage';
 
 const AppRoutes = () => {
   return (
@@ -29,6 +33,11 @@ const AppRoutes = () => {
           <Route path="/client/freelancer/:id" element={<FreelancerDetailsPage />} />
           <Route path="/client/job-proposals" element={<JobProposalsPage />} />  
           <Route path="/client/SearchTalentPage" element={<Navigate to="/client/search-talent" replace />} />
+          <Route path="/client/contracts" element={<MyContractsPage />} />
+          <Route path="/client/contracts/:id" element={<ContractDetailsPage />} />
+          <Route path="/client/contracts/:contractId/deliveries" element={<ClientDeliveryPortalPage />} />
+          <Route path="/client/messages" element={<MessagesPage />} />
+          <Route path="/client/messages/:chatId" element={<MessagesPage />} />
         </Route>
       </Route>
 
