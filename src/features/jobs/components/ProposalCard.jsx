@@ -38,6 +38,8 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
         marginBottom: '1.25rem',
         transition: 'box-shadow 0.2s',
         opacity: isHistory ? 0.85 : 1,
+        width: '100%',
+        boxSizing: 'border-box',
       }}
       onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.07)'}
       onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
@@ -116,8 +118,8 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
         {coverLetter}
       </p>
 
-      {/* Action buttons — only for sent offers */}
-      {!isHistory && isSentOffer && (
+      {/* Action buttons — reject for sent offers, accept for submitted */}
+      {!isHistory && (isSentOffer || s === 'submitted') && (
         <div style={{
           display: 'flex',
           gap: '12px',
@@ -125,48 +127,52 @@ const ProposalCard = ({ proposal, onAccept, onReject, isHistory }) => {
           borderTop: '1px solid #f0f0f0',
           paddingTop: '1.25rem',
         }}>
-          <button
-            onClick={() => onReject(proposal)}
-            style={{
-              padding: '9px 24px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              cursor: 'pointer',
-              border: '1px solid #e0e0e0',
-              background: '#ffffff',
-              color: '#555',
-              fontWeight: '500',
-              transition: 'background 0.15s, border-color 0.15s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = '#f7f7f5';
-              e.currentTarget.style.borderColor = '#ccc';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = '#ffffff';
-              e.currentTarget.style.borderColor = '#e0e0e0';
-            }}
-          >
-            Reject
-          </button>
-          <button
-            onClick={() => onAccept(proposal)}
-            style={{
-              padding: '9px 24px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              cursor: 'pointer',
-              border: '1px solid #B7A06A',
-              background: '#B7A06A',
-              color: '#fff',
-              fontWeight: '500',
-              transition: 'background 0.15s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = '#a08d5a'}
-            onMouseLeave={e => e.currentTarget.style.background = '#B7A06A'}
-          >
-            Accept
-          </button>
+          {isSentOffer && (
+            <button
+              onClick={() => onReject(proposal)}
+              style={{
+                padding: '9px 24px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                cursor: 'pointer',
+                border: '1px solid #e0e0e0',
+                background: '#ffffff',
+                color: '#555',
+                fontWeight: '500',
+                transition: 'background 0.15s, border-color 0.15s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = '#f7f7f5';
+                e.currentTarget.style.borderColor = '#ccc';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = '#ffffff';
+                e.currentTarget.style.borderColor = '#e0e0e0';
+              }}
+            >
+              Reject
+            </button>
+          )}
+          {s === 'submitted' && (
+            <button
+              onClick={() => onAccept(proposal)}
+              style={{
+                padding: '9px 24px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                cursor: 'pointer',
+                border: '1px solid #B7A06A',
+                background: '#B7A06A',
+                color: '#fff',
+                fontWeight: '500',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#a08d5a'}
+              onMouseLeave={e => e.currentTarget.style.background = '#B7A06A'}
+            >
+              Accept
+            </button>
+          )}
         </div>
       )}
     </div>

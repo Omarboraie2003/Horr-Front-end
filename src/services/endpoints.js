@@ -65,6 +65,7 @@ export const ENDPOINTS = {
     MY_CONTRACTS: '/contracts/my-contracts',
     GET_CONTRACT: (id) => `/contracts/${id}`,
     SUBMIT_REVIEW: (id) => `/contracts/${id}/reviews`,
+    REVOKE_OFFER: (id) => `/contracts/${id}/revoke-offer`,
   },
   DELIVERIES: {
     GET_BY_CONTRACT: '/deliveries',

@@ -1,4 +1,3 @@
-
 export default function DeliveryStatusBadge({ status }) {
   
   const getBadgeStyle = (currentStatus) => {
@@ -16,14 +15,14 @@ export default function DeliveryStatusBadge({ status }) {
     }
   };
 
-  const statusKeyMap = {
-    'Pending': 'delivery.status.pending',
-    'Approved': 'delivery.status.approved',
-    'Disputed': 'delivery.status.disputed',
-    'RevisionRequested': 'delivery.status.revisionRequested'
+  const statusLabelMap = {
+    'Pending': 'Pending',
+    'Approved': 'Approved',
+    'Disputed': 'Disputed',
+    'RevisionRequested': 'Revision Requested'
   };
 
-  const label = t(statusKeyMap[status] || status, { defaultValue: status });
+  const label = statusLabelMap[status] || status;
 
   return (
     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider border ${getBadgeStyle(status)}`}>

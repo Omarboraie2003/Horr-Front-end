@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getClientProposals, revokeOffer, createOffer } from '../../../services/clientService';
+import useFetch from '../../../hooks/useFetch';
 import ProposalsList from '../components/ProposalsList';
 import RejectConfirmModal from '../components/RejectConfirmModal';
 import CreateOfferModal from '../components/CreateOfferModal';
@@ -11,38 +12,31 @@ const JobProposalsPage = () => {
   const [searchParams] = useSearchParams();
   const jobId = searchParams.get('jobId');
 
-  const [proposals, setProposals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const {
+    data: proposalsData,
+    loading,
+    error,
+    setData: setProposals,
+    refetch: refetchProposals,
+  } = useFetch(getClientProposals);
+
+  const proposals = Array.isArray(proposalsData) ? proposalsData : [];
   const [activeTab, setActiveTab] = useState('active');
 
   const [rejectingProposal, setRejectingProposal] = useState(null);
   const [acceptingProposal, setAcceptingProposal] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchProposals = async () => {
-      try {
-        setLoading(true);
-        const data = await getClientProposals();
-        setProposals(data);
-      } catch (err) {
-        setError('Failed to load proposals. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProposals();
-  }, []);
-
   const handleRejectConfirm = async () => {
     setActionLoading(true);
     try {
       await revokeOffer(rejectingProposal.id);
       setProposals((prev) =>
-        prev.map((p) =>
-          p.id === rejectingProposal.id ? { ...p, status: 'Revoked' } : p
-        )
+        Array.isArray(prev)
+          ? prev.map((p) =>
+              p.id === rejectingProposal.id ? { ...p, status: 'Revoked' } : p
+            )
+          : prev
       );
       toast.success('Offer revoked successfully');
       setRejectingProposal(null);
@@ -70,11 +64,7 @@ const JobProposalsPage = () => {
        agreedRate,
        jobDescription,
     });
-      setProposals((prev) =>
-        prev.map((p) =>
-          p.id === acceptingProposal.id ? { ...p, status: 'Accepted' } : p
-        )
-      );
+      await refetchProposals();
       toast.success('Offer sent successfully');
       setAcceptingProposal(null);
     } catch (err) {
@@ -95,7 +85,7 @@ const JobProposalsPage = () => {
 
   const activeProposals = filtered.filter((p) => {
     const s = String(p.status ?? p.Status).toLowerCase();
-    return ['active', 'accepted', 'approved', '1'].includes(s);
+    return ['active', 'accepted', 'approved', '1', 'submitted'].includes(s);
   });
 
   const sentProposals = filtered.filter((p) => {
@@ -105,20 +95,21 @@ const JobProposalsPage = () => {
 
   const historyProposals = filtered.filter((p) => {
     const s = String(p.status ?? p.Status).toLowerCase();
-    const isActive = ['active', 'accepted', 'approved', '1'].includes(s);
+    const isActive = ['active', 'accepted', 'approved', '1', 'submitted'].includes(s);
     const isSent = ['pending', 'sent', 'offer', '0'].includes(s);
     return !isActive && !isSent;
   });
 
-  let displayed = [];
-  if (activeTab === 'active') displayed = activeProposals;
-  else if (activeTab === 'sent') displayed = sentProposals;
-  else displayed = historyProposals;
+  const displayed = activeTab === 'active'
+    ? activeProposals
+    : activeTab === 'sent'
+      ? sentProposals
+      : historyProposals;
 
   const totalCount = displayed.length;
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 3rem' }}>
+    <div style={{ maxWidth: '850px', width: '100%', margin: '0 auto', padding: '2.5rem 3rem', boxSizing: 'border-box' }}>
 
       {/* Back button */}
       <button

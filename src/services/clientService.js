@@ -174,3 +174,8 @@ export const getInvitationDetails = async (invitationId) => {
   const response = await apiClient.get(ENDPOINTS.JOB_INVITATIONS.DETAIL.replace('{id}', invitationId));
   return response.data;
 };
+
+export const revokeOffer = async (contractId) => {
+  const response = await apiClient.post(ENDPOINTS.CONTRACTS.REVOKE_OFFER(contractId));
+  return response.data;
+};
