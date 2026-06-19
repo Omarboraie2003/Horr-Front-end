@@ -31,7 +31,7 @@ const AppRoutes = () => {
           <Route path="/client/settings" element={<SettingsPage />} />
           <Route path="/client/search-talent" element={<SearchTalentPage />} />
           <Route path="/client/freelancer/:id" element={<FreelancerDetailsPage />} />
-          <Route path="/client/job-proposals" element={<JobProposalsPage />} />  
+          <Route path="/client/job-proposals" element={<JobProposalsPage />} />
           <Route path="/client/SearchTalentPage" element={<Navigate to="/client/search-talent" replace />} />
           <Route path="/client/contracts" element={<MyContractsPage />} />
           <Route path="/client/contracts/:id" element={<ContractDetailsPage />} />
