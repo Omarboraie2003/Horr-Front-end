@@ -17,6 +17,7 @@ export default function Navbar({ role = "client", user = null }) {
   const navigate = useNavigate();
 
   const isMessages = location.pathname.toLowerCase().includes("messages");
+  const isContracts = location.pathname.toLowerCase().includes("contracts");
   const initials = getInitials(user);
 
   return (
@@ -289,6 +290,14 @@ export default function Navbar({ role = "client", user = null }) {
               </div>
             </div>
           )}
+
+          {/* My Contracts link */}
+          <Link
+            className={`horr-nav-link ${isContracts ? "active" : ""}`}
+            to="/client/contracts"
+          >
+            My Contracts
+          </Link>
 
           {/* Messages link */}
           <Link
