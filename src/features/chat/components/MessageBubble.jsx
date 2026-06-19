@@ -1,61 +1,94 @@
-import React from 'react';
+import { format } from 'date-fns';
 
 export default function MessageBubble({ message, isOwnMessage }) {
-  const text = message.body ?? message.Body ?? message.textContent ?? message.TextContent ?? message.text ?? message.Text ?? message.content ?? '';
-  const timestamp = message.sentAt ?? message.SentAt ?? message.createdAt ?? message.CreatedAt ?? message.timestamp ?? new Date().toISOString();
-  
-  // Format the time
-  let timeStr = '';
-  try {
-    timeStr = new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } catch {
-    timeStr = '';
-  }
+  const getProp = (obj, propName) => {
+    if (!obj) return null;
+    const lower = propName.toLowerCase();
+    for (const key of Object.keys(obj)) {
+      if (key.toLowerCase() === lower) {
+        return obj[key];
+      }
+    }
+    return null;
+  };
 
-  // Handle file attachments if any
-  const attachmentUrl = message.fileUrl ?? message.FileUrl ?? message.attachmentUrl ?? message.AttachmentUrl;
-  const fileName = message.fileName ?? message.FileName;
+  const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200/api';
+  const BASE_URL = apiBase.endsWith('/api') ? apiBase.slice(0, -4) : apiBase;
+
+  const type = getProp(message, 'type');
+  const body = getProp(message, 'body');
+  const textContent = getProp(message, 'textContent');
+  const fileUrl = getProp(message, 'fileUrl');
+  const fileName = getProp(message, 'fileName');
+  const senderAvatarUrl = getProp(message, 'senderAvatarUrl');
+  const senderName = getProp(message, 'senderName') || 'User';
+  const sentAt = getProp(message, 'sentAt') || new Date().toISOString();
+
+  const renderContent = () => {
+    const normalizedType = typeof type === 'string' ? type.toLowerCase() : type;
+    switch (normalizedType) {
+      case 0:
+      case 'text': // Text
+        return (
+          <p>{textContent || body}</p>
+        );
+      case 1:
+      case 'image': // Image
+        return (
+          <img
+            src={`${BASE_URL}${fileUrl}`}
+            alt="image"
+            style={{ maxWidth: '100%', borderRadius: '8px' }}
+          />
+        );
+      case 2:
+      case 'video': // Video
+        return (
+          <video
+            controls
+            src={`${BASE_URL}${fileUrl}`}
+            style={{ maxWidth: '100%', borderRadius: '8px' }}
+          />
+        );
+      case 3:
+      case 'pdf': // PDF
+        return (
+          <a
+            href={`${BASE_URL}${fileUrl}`}
+            download
+            className="flex items-center gap-2"
+            style={{ textDecoration: 'underline' }}
+          >
+            📄 {fileName}
+          </a>
+        );
+      default:
+        return <p style={{ color: '#aaa' }}>Unsupported message type</p>;
+    }
+  };
 
   return (
-    <div className={`message-wrapper ${isOwnMessage ? 'message-own' : 'message-other'}`} style={{ display: 'flex', flexDirection: 'column', alignItems: isOwnMessage ? 'flex-end' : 'flex-start', marginBottom: '12px' }}>
-      <div 
-        className={`message-bubble ${isOwnMessage ? 'bg-amber-500 text-white' : 'bg-gray-100 text-gray-800'}`}
-        style={{
-          padding: '10px 14px',
-          borderRadius: '16px',
-          borderBottomRightRadius: isOwnMessage ? '4px' : '16px',
-          borderBottomLeftRadius: !isOwnMessage ? '4px' : '16px',
-          maxWidth: '75%',
-          wordBreak: 'break-word',
-          background: isOwnMessage ? '#d4af37' : '#f3f4f6', // Gold background for own
-          color: isOwnMessage ? '#fff' : '#1f2937'
-        }}
-      >
-        {text && <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.4' }}>{text}</p>}
-        
-        {attachmentUrl && (
-          <a 
-            href={attachmentUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              marginTop: text ? '8px' : '0', padding: '6px 10px',
-              background: isOwnMessage ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)',
-              borderRadius: '8px', color: 'inherit', textDecoration: 'none',
-              fontSize: '0.85rem'
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-            </svg>
-            {fileName || 'Attachment'}
-          </a>
-        )}
+    <div className={`message-group ${isOwnMessage ? 'me' : 'other'}`}>
+      {/* Avatar */}
+      <div className="message-avatar">
+        <img
+          src={
+            senderAvatarUrl ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(senderName)}&background=random`
+          }
+          alt={senderName}
+        />
       </div>
-      <span style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '4px', padding: '0 4px' }}>
-        {timeStr}
-      </span>
+
+      {/* Bubble Content */}
+      <div className="message-content">
+        <div className="message-bubble" style={isOwnMessage ? { backgroundColor: '#eab308', color: '#ffffff' } : {}}>
+          {renderContent()}
+        </div>
+        <p className="message-time">
+          {format(new Date(sentAt), 'hh:mm a')}
+        </p>
+      </div>
     </div>
   );
 }

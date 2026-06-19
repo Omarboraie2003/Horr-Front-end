@@ -1,201 +1,313 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Package, Loader2 } from 'lucide-react';
-import { getMessages } from '../../../services/chatService';
-import useChatConnection from '../../../hooks/useChatConnection';
+import { toast } from 'sonner';
+import { useChatConnection } from '../../../hooks/useChatConnection';
+import { getMessages, getChats } from '../../../services/chatService';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 
-export default function ChatWindow({ chatId, chatList, initialActiveChat }) {
-  const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
-  const currentUserId = user?.id || user?.userId || user?.Id;
+// ─── Import your layout stylesheet ─────────────────────────────────────────
+import '../../../styles/chat-styles.css';
 
+const getMessageId = (msg) => {
+  if (!msg) return null;
+  return msg.Id || msg.MessageId || msg.id || msg.messageId;
+};
+
+// Helper to get case-insensitive properties
+const getProp = (obj, propName) => {
+  if (!obj) return null;
+  const lower = propName.toLowerCase();
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === lower) {
+      return obj[key];
+    }
+  }
+  return null;
+};
+
+export default function ChatWindow({ chatId, initialActiveChat }) {
+  const isValidChat = chatId && chatId !== 'demo-chat-id' && chatId !== 'undefined';
   const [messages, setMessages] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [loading, setLoading] = useState(isValidChat);
+  const [activeChat, setActiveChat] = useState(initialActiveChat || null);
+  const navigate = useNavigate();
+
+  // ─── Pagination & Scrolling States ──────────────────────────────────────────
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const scrollRef = useRef(null);
-
-  // Find metadata for header
-  const chatMetadata = initialActiveChat ?? chatList?.find(c => {
-    const cid = c.chatId ?? c.id ?? c.ChatId ?? c.Id;
-    return String(cid) === String(chatId);
-  });
+  const containerRef = useRef(null);
+  const prevScrollHeightRef = useRef(0);
+  const prevScrollTopRef = useRef(0);
+  const isPrependingRef = useRef(false);
+  const isInitialLoadRef = useRef(true);
   
-  const contractId = chatMetadata?.contractId ?? chatMetadata?.ContractId;
-  const contractTitle = chatMetadata?.contractTitle ?? chatMetadata?.ContractTitle ?? chatMetadata?.title ?? chatMetadata?.Title ?? (contractId ? `Contract #${contractId}` : 'Chat');
-  const freelancerName = chatMetadata?.otherPartyName ?? chatMetadata?.OtherPartyName ?? chatMetadata?.freelancerName ?? chatMetadata?.FreelancerName ?? 'Freelancer';
+  // Use Redux for auth in Horr-Front-end
+  const user = useSelector((state) => state.auth.user);
+  const userId = user?.id || user?.userId || user?.Id;
 
-  // Initial Load
+  // Sync activeChat when prop changes
   useEffect(() => {
+    if (initialActiveChat) {
+      setActiveChat(initialActiveChat);
+    }
+  }, [initialActiveChat]);
+
+  // ─── Append incoming SignalR message ──────────────────────────────────────
+  const handleNewMessage = (message) => {
+    const newId = getMessageId(message);
+    if (!newId) return;
+    setMessages((prev) => {
+      if (prev.some((m) => getMessageId(m) === newId)) {
+        return prev;
+      }
+      return [...prev, message];
+    });
+  };
+
+  // ─── SignalR connection ────────────────────────────────────────────────────
+  const { connectionState } = useChatConnection(chatId, handleNewMessage);
+
+  // ─── Load initial page of messages and chat details ────────────────────────
+  useEffect(() => {
+    if (!isValidChat) return;
     let active = true;
-    const fetchInitial = async () => {
-      if (!chatId) return;
-      setIsInitialLoading(true);
+
+    const loadData = async () => {
+      await Promise.resolve();
+      if (!active) return;
+      setLoading(true);
+      setCurrentPage(1);
+      setHasMore(true);
+      setIsFetchingMore(false);
+      isInitialLoadRef.current = true;
+
       try {
-        const result = await getMessages(chatId, 1, 30);
-        if (!active) return;
-        const items = Array.isArray(result) ? result : (result?.items ?? result?.data ?? []);
-        setMessages([...items].reverse());
-        setHasMore(items.length === 30);
-        setPage(1);
-      } catch (err) {
-        console.error('Failed to load messages', err);
+        // Load active chat info
+        if (!initialActiveChat) {
+          const chatsList = await getChats();
+          if (active && chatsList && Array.isArray(chatsList)) {
+            const found = chatsList.find(c => {
+              const cId = getProp(c, 'id') || getProp(c, 'chatId');
+              return String(cId) === String(chatId);
+            });
+            if (found) {
+              setActiveChat(found);
+            }
+          }
+        }
+
+        // Load messages (page 1)
+        const data = await getMessages(chatId, 1);
+        if (active) {
+          const items = getProp(data, 'items') || [];
+          const reversed = [...items].reverse();
+          setMessages(reversed);
+          if (items.length < 30) {
+            setHasMore(false);
+          }
+        }
+      } catch {
+        toast.error('Could not load messages from server.');
       } finally {
-        if (active) setIsInitialLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
-    fetchInitial();
-    return () => { active = false; };
-  }, [chatId]);
 
-  // Scroll to bottom on initial load
-  useEffect(() => {
-    if (!isInitialLoading && page === 1 && scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [isInitialLoading, page, chatId]);
+    loadData();
 
-  // Fetch more when scrolling to top
-  const handleScroll = async () => {
-    if (!scrollRef.current || !hasMore || isFetchingMore || isInitialLoading) return;
-    
-    // Within 50px of top
-    if (scrollRef.current.scrollTop <= 50) {
+    return () => {
+      active = false;
+    };
+  }, [chatId, isValidChat, initialActiveChat]);
+
+  // ─── Handle Scroll Up Lazy Loading ─────────────────────────────────────────
+  const handleScroll = async (e) => {
+    const container = e.currentTarget;
+    if (container.scrollTop < 50 && hasMore && !isFetchingMore && isValidChat && !loading) {
       setIsFetchingMore(true);
-      const prevScrollHeight = scrollRef.current.scrollHeight;
-      
+      const nextPage = currentPage + 1;
+
       try {
-        const nextPage = page + 1;
-        const result = await getMessages(chatId, nextPage, 30);
-        const newItems = Array.isArray(result) ? result : (result?.items ?? result?.data ?? []);
-        
-        if (newItems.length > 0) {
-          setMessages(prev => [...[...newItems].reverse(), ...prev]);
-          setPage(nextPage);
-          setHasMore(newItems.length === 30);
+        // Store current scroll measurements for restoration
+        prevScrollHeightRef.current = container.scrollHeight;
+        prevScrollTopRef.current = container.scrollTop;
+
+        const data = await getMessages(chatId, nextPage);
+        const items = getProp(data, 'items') || [];
+
+        if (items.length < 30) {
+          setHasMore(false);
+        }
+
+        if (items.length > 0) {
+          const reversedNewItems = [...items].reverse();
+          isPrependingRef.current = true;
+          setMessages((prev) => [...reversedNewItems, ...prev]);
+          setCurrentPage(nextPage);
         } else {
           setHasMore(false);
         }
       } catch (err) {
-        console.error('Failed to fetch more messages', err);
+        console.error('Error fetching older messages:', err);
+        toast.error('Could not load older messages.');
       } finally {
         setIsFetchingMore(false);
-        // Restore scroll position
-        if (scrollRef.current) {
-          const newScrollHeight = scrollRef.current.scrollHeight;
-          scrollRef.current.scrollTop = newScrollHeight - prevScrollHeight;
-        }
       }
     }
   };
 
-  // SignalR Connection
-  const onMessageReceived = useCallback((newMessage) => {
-    setMessages(prev => {
-      const msgId = newMessage.id ?? newMessage.Id;
-      // Append only if the message ID doesn't already exist
-      if (prev.some(m => (m.id ?? m.Id) === msgId)) return prev;
-      return [...prev, newMessage];
-    });
-    // Auto-scroll to bottom for new message
-    setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
-    }, 100);
-  }, []);
+  // ─── Scroll Restoration and Alignment ─────────────────────────────────────
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  useChatConnection(chatId, onMessageReceived);
+    if (isInitialLoadRef.current && messages.length > 0) {
+      container.scrollTop = container.scrollHeight;
+      isInitialLoadRef.current = false;
+    } else if (isPrependingRef.current) {
+      const diff = container.scrollHeight - prevScrollHeightRef.current;
+      container.scrollTop = prevScrollTopRef.current + diff;
+      isPrependingRef.current = false;
+    } else {
+      // Smooth scroll for new message
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, loading]);
 
-  // Handle local send
-  const handleLocalSend = (newMessage) => {
-    setMessages(prev => {
-      const msgId = newMessage.id ?? newMessage.Id;
-      if (prev.some(m => (m.id ?? m.Id) === msgId)) return prev;
-      return [...prev, newMessage];
-    });
-    setTimeout(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      }
-    }, 100);
-  };
-
-  if (!chatId) {
+  // ─── Placeholder state if no active chat is selected ─────────────────────
+  if (!chatId || chatId === 'demo-chat-id' || chatId === 'undefined') {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 text-gray-500">
-        <MessageSquare size={48} className="mb-4 opacity-20" />
-        <p>Select a conversation to start messaging</p>
-      </div>
+      <main className="chat-main items-center justify-center text-center p-8 bg-gray-50 dark:bg-zinc-950">
+        <div className="flex flex-col items-center max-w-sm">
+          <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4 shadow-sm">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No conversation selected</h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            Select a contact from the sidebar to start chatting, view project details, and access the delivery portal.
+          </p>
+        </div>
+      </main>
     );
   }
 
+  // ─── Loading state ────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <main className="chat-main items-center justify-center">
+        <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </main>
+    );
+  }
+
+  // Helper to resolve property names case-insensitively
+  const getActiveChatProp = (propName) => {
+    if (!activeChat) return null;
+    const lower = propName.toLowerCase();
+    for (const key of Object.keys(activeChat)) {
+      if (key.toLowerCase() === lower) {
+        return activeChat[key];
+      }
+    }
+    return null;
+  };
+
+  const otherPartyName = getActiveChatProp('otherPartyName') || 'Chat';
+  const otherPartyAvatarUrl = getActiveChatProp('otherPartyAvatarUrl');
+  const contractId = getActiveChatProp('contractId');
+
+  // ─── Main render ──────────────────────────────────────────────────────────
   return (
-    <div className="chat-window flex-1 flex flex-col bg-gray-50 h-full overflow-hidden relative">
-      {/* Header */}
-      <div className="chat-header bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-lg font-bold text-gray-800">{freelancerName}</h2>
-          <p className="text-xs text-amber-600 font-medium">{contractTitle}</p>
+    <main className="chat-main">
+
+      {/* ── Name bar ───────────────────────────────────────────────────────── */}
+      <header className="chat-header justify-between">
+
+        <div className="flex items-center gap-4">
+          <div className="user-status-avatar">
+            <img 
+              src={
+                otherPartyAvatarUrl || 
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(otherPartyName)}&background=random`
+              } 
+              alt={otherPartyName} 
+            />
+            <div
+              className={`status-indicator ${connectionState === 'Connected' ? 'online' : ''}`}
+              style={{ display: 'block', background: connectionState === 'Reconnecting' ? '#eab308' : '' }}
+            ></div>
+          </div>
+          <div className="chat-header-info">
+            <h3>{otherPartyName}</h3>
+            <p className="text-xs text-gray-500">{connectionState}</p>
+          </div>
         </div>
+
+        {/* Delivery Portal button */}
         {contractId && (
-          <button 
-            onClick={() => navigate(`/client/contracts/${contractId}/deliveries`)}
-            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-sm"
+          <button
+            onClick={() => {
+              navigate(`/client/contracts/${contractId}/deliveries`);
+            }}
+            className="bg-[#eab308] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 transition-opacity"
           >
-            <Package size={14} /> Delivery Portal
+            Delivery Portal
           </button>
         )}
-      </div>
 
-      {/* Messages Area */}
-      <div 
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 sm:p-6"
-      >
+      </header>
+
+      {/* ── Messages list ──────────────────────────────────────────────────── */}
+      <div className="chat-messages" ref={containerRef} onScroll={handleScroll}>
+
         {isFetchingMore && (
-          <div className="flex justify-center py-2">
-            <Loader2 className="animate-spin text-amber-500" size={20} />
+          <div className="flex justify-center py-2 flex-shrink-0">
+            <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
-        {isInitialLoading ? (
-          <div className="flex justify-center items-center h-full">
-            <Loader2 className="animate-spin text-amber-500" size={32} />
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex justify-center items-center h-full text-gray-400 text-sm">
-            No messages yet. Send a message to start the conversation!
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+            No messages yet. Say hello!
           </div>
         ) : (
-          <div className="space-y-1">
-            {messages.map((msg, idx) => {
-              const msgId = msg.id ?? msg.Id ?? idx;
-              const senderId = String(msg.senderId ?? msg.SenderId);
-              const isOwnMessage = senderId === String(currentUserId);
-              return (
-                <MessageBubble 
-                  key={msgId} 
-                  message={msg} 
-                  isOwnMessage={isOwnMessage} 
-                />
-              );
-            })}
-          </div>
+          messages.map((message, idx) => {
+            const mId = message.Id || message.MessageId || message.id || message.messageId || `msg-${idx}`;
+            const mSenderId = message.SenderId || message.senderId;
+            return (
+              <MessageBubble
+                key={mId}
+                message={message}
+                isOwnMessage={String(mSenderId) === String(userId)}
+              />
+            );
+          })
         )}
       </div>
 
-      {/* Input Area */}
-      <MessageInput chatId={chatId} onMessageSent={handleLocalSend} />
-    </div>
+      {/* ── Input bar ──────────────────────────────────────────────────────── */}
+      <MessageInput
+        chatId={chatId}
+        onMessageSent={(newMessage) => {
+          const newId = getMessageId(newMessage);
+          if (!newId) return;
+          setMessages((prev) => {
+            if (prev.some((m) => getMessageId(m) === newId)) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
+        }}
+      />
+
+    </main>
   );
 }
-
-// Ensure MessageSquare is imported for the empty state
-import { MessageSquare } from 'lucide-react';

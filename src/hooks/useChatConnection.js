@@ -1,88 +1,88 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
+import { toast } from 'sonner';
 
-const HUB_URL = 'https://localhost:7070/hubs/chat';
-
-// ---------------------------------------------------------------------------
-// useChatConnection
-//
-// Establishes a SignalR connection to the chat hub for the given chatId.
-// - Reads auth token from localStorage under the key 'token'.
-// - Invokes 'JoinChat' with chatId on successful connection.
-// - Invokes 'LeaveChat' and stops the connection on unmount.
-// - Uses .withAutomaticReconnect() for resilience.
-//
-// @param {string|null} chatId   — The chat room to join. Connection is skipped
-//                                  when null/undefined.
-// @param {Function}    onMessage — Callback invoked with each incoming message
-//                                  object from the 'ReceiveMessage' hub event.
-// ---------------------------------------------------------------------------
-export function useChatConnection(chatId, onMessage) {
+export function useChatConnection(chatId, onMessageReceived) {
   const connectionRef = useRef(null);
-  // Keep the onMessage callback in a ref so we never need to re-run the
-  // effect when only the callback identity changes.
-  const onMessageRef = useRef(onMessage);
-  useEffect(() => {
-    onMessageRef.current = onMessage;
-  }, [onMessage]);
+  const [connectionState, setConnectionState] = useState('Disconnected');
+  const onMessageReceivedRef = useRef(onMessageReceived);
 
-  // Stable helper that stops the connection gracefully.
-  const stopConnection = useCallback(async () => {
-    const conn = connectionRef.current;
-    if (!conn) return;
-    try {
-      if (conn.state === signalR.HubConnectionState.Connected) {
-        await conn.invoke('LeaveChat', chatId);
-      }
-      await conn.stop();
-    } catch (err) {
-      console.warn('[useChatConnection] error during stop:', err);
-    } finally {
-      connectionRef.current = null;
-    }
-  }, [chatId]);
+  // Keep the handler ref updated
+  useEffect(() => {
+    onMessageReceivedRef.current = onMessageReceived;
+  }, [onMessageReceived]);
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || chatId === 'demo-chat-id' || chatId === 'undefined') return;
 
-    const token = localStorage.getItem('token');
+    let isMounted = true;
 
+    // Resolve Hub URL dynamically based on VITE_API_BASE_URL
+    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5200/api';
+    const hubUrl = apiBase.endsWith('/api') ? apiBase.slice(0, -4) + '/hubs/chat' : apiBase + '/hubs/chat';
+
+    // 1. Build the connection
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(HUB_URL, {
-        accessTokenFactory: () => token,
+      .withUrl(hubUrl, {
+        accessTokenFactory: () => localStorage.getItem('token'),
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Warning)
       .build();
 
-    connectionRef.current = connection;
-
-    // Register incoming message handler before starting.
+    // 2. Register the incoming message handler
     connection.on('ReceiveMessage', (message) => {
-      onMessageRef.current?.(message);
+      onMessageReceivedRef.current?.(message);
     });
 
-    // Start and join the room.
+    // 3. Track connection state changes
+    connection.onreconnecting(() => {
+      if (isMounted) setConnectionState('Reconnecting');
+    });
+    connection.onreconnected(() => {
+      if (isMounted) setConnectionState('Connected');
+    });
+    connection.onclose(() => {
+      if (isMounted) setConnectionState('Disconnected');
+    });
+
+    // 4. Start connection then join the chat group
     connection
       .start()
-      .then(async () => {
-        try {
-          await connection.invoke('JoinChat', chatId);
-        } catch (err) {
-          console.error('[useChatConnection] JoinChat error:', err);
+      .then(() => {
+        if (!isMounted) {
+          if (connection.state === signalR.HubConnectionState.Connected) {
+            connection.stop();
+          }
+          return;
         }
+        setConnectionState('Connected');
+        return connection.invoke('JoinChat', chatId);
       })
       .catch((err) => {
-        console.error('[useChatConnection] connection start error:', err);
+        if (isMounted) {
+          console.error('SignalR connection error:', err);
+          toast.error('Could not connect to chat. Please refresh.');
+        }
       });
 
-    // Cleanup: leave room and stop on unmount or chatId change.
-    return () => {
-      stopConnection();
-    };
-  }, [chatId, stopConnection]);
+    connectionRef.current = connection;
 
-  return connectionRef;
+    // 5. Cleanup — leave chat group if connected, then stop connection
+    return () => {
+      isMounted = false;
+      if (connection.state === signalR.HubConnectionState.Connected) {
+        connection
+          .invoke('LeaveChat', chatId)
+          .catch((err) => console.error('LeaveChat error:', err))
+          .finally(() => connection.stop());
+      } else {
+        connection.stop();
+      }
+    };
+  }, [chatId]); // Re-runs when chatId changes
+
+  return { connectionState };
 }
 
 export default useChatConnection;
