@@ -282,32 +282,28 @@ export default function ContractDetailsPage() {
         {/* Header */}
         <div className="contract-header">
           <div className="header-left">
-            <h1 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0, color: 'var(--text-h)' }}>
+            <h1 id="contract-title" style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0, color: 'var(--text-h)' }}>
               {title}
             </h1>
             <p className="client-subtitle">{freelancer}</p>
           </div>
-          <div className="header-right">
-            <span className={`contract-status ${isActiveStatus(status) ? 'status-active' : 'status-closed'}`}>
-              {isActiveStatus(status) ? 'Active' : status.charAt(0).toUpperCase() + status.slice(1)}
-            </span>
-            <div className="header-buttons">
-              <button className="btn-message" onClick={handleMessageFreelancer}>
-                <MessageSquare size={15} /> Message Freelancer
+          <div className="header-right header-buttons">
+            <button className="btn-message" onClick={handleMessageFreelancer}>
+              <MessageSquare size={15} /> Message Freelancer
+            </button>
+            {isActiveStatus(status) && (
+              <button
+                className="btn-deliver"
+                onClick={() => navigate(`/client/contracts/${id}/deliveries`)}
+              >
+                <Package size={15} /> View Delivery Portal
               </button>
-              {isActiveStatus(status) && (
-                <button
-                  className="btn-deliver"
-                  onClick={() => navigate(`/client/contracts/${id}/deliveries`)}
-                >
-                  <Package size={15} /> View Delivery Portal
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
         {/* Terms Grid */}
+        <div className="section-title">Contract Terms</div>
         <div className="terms-grid">
           <div className="term-item">
             <span className="term-label">Agreed Rate</span>
@@ -331,6 +327,14 @@ export default function ContractDetailsPage() {
               <span className="term-value">{formatDate(endDate)}</span>
             </div>
           )}
+          <div className="term-item">
+            <span className="term-label">Status</span>
+            <span className="term-value">
+              <span className={`contract-status ${isActiveStatus(status) ? 'status-active' : 'status-closed'}`}>
+                {isActiveStatus(status) ? 'Active' : status.charAt(0).toUpperCase() + status.slice(1)}
+              </span>
+            </span>
+          </div>
         </div>
 
         {/* Description */}

@@ -8,7 +8,7 @@ const MainLayout = () => {
   return (
     <div className="main-layout min-h-screen">
       <Navbar role="client" user={user} />
-      <main>
+      <main className="w-full flex flex-col items-center">
         <Outlet />
       </main>
       {/* Footer could go here */}

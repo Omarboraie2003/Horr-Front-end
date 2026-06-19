@@ -6,10 +6,11 @@ export default function ChatSidebar({ chats }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredChats = chats?.filter(chat => {
-    const title = chat.contractTitle ?? chat.ContractTitle ?? chat.title ?? chat.Title ?? 'Unknown Chat';
-    const freelancer = chat.freelancerName ?? chat.FreelancerName ?? 'Unknown';
+    const contractId = chat.contractId ?? chat.ContractId;
+    const title = chat.contractTitle ?? chat.ContractTitle ?? chat.title ?? chat.Title ?? (contractId ? `Contract #${contractId}` : 'Unknown Chat');
+    const name = chat.otherPartyName ?? chat.OtherPartyName ?? chat.freelancerName ?? chat.FreelancerName ?? 'Unknown';
     const searchStr = searchTerm.toLowerCase();
-    return title.toLowerCase().includes(searchStr) || freelancer.toLowerCase().includes(searchStr);
+    return title.toLowerCase().includes(searchStr) || name.toLowerCase().includes(searchStr);
   }) || [];
 
   return (
@@ -39,10 +40,11 @@ export default function ChatSidebar({ chats }) {
           <ul className="divide-y divide-gray-100">
             {filteredChats.map(chat => {
               const chatId = chat.chatId ?? chat.id ?? chat.ChatId ?? chat.Id;
-              const title = chat.contractTitle ?? chat.ContractTitle ?? chat.title ?? chat.Title ?? 'Unknown Chat';
-              const name = chat.freelancerName ?? chat.FreelancerName ?? 'Unknown';
+              const contractId = chat.contractId ?? chat.ContractId;
+              const title = chat.contractTitle ?? chat.ContractTitle ?? chat.title ?? chat.Title ?? (contractId ? `Contract #${contractId}` : 'Unknown Chat');
+              const name = chat.otherPartyName ?? chat.OtherPartyName ?? chat.freelancerName ?? chat.FreelancerName ?? 'Unknown';
               const unreadCount = chat.unreadCount ?? chat.UnreadCount ?? 0;
-              const lastMsg = chat.lastMessage ?? chat.LastMessage ?? '';
+              const lastMsg = chat.lastMessagePreview ?? chat.LastMessagePreview ?? chat.lastMessage ?? chat.LastMessage ?? '';
               
               return (
                 <li key={chatId}>

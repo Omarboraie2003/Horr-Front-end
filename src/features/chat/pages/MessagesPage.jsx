@@ -1,59 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getChats } from '../../services/chatService';
-import ChatSidebar from './components/ChatSidebar';
-import ChatWindow from './components/ChatWindow';
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import ChatSidebar from '../components/ChatSidebar';
+import ChatWindow from '../components/ChatWindow';
+import { getChats } from '../../../services/chatService';
+import { toast } from 'sonner';
 
-import '../../styles/chat-styles.css';
+// ─── Import your layout stylesheet ─────────────────────────────────────────
+import '../../../styles/chat-styles.css';
+
+// Helper to resolve property names case-insensitively
+const getProp = (obj, propName) => {
+  if (!obj) return null;
+  const lower = propName.toLowerCase();
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === lower) {
+      return obj[key];
+    }
+  }
+  return null;
+};
 
 export default function MessagesPage() {
   const { chatId } = useParams();
-  const navigate = useNavigate();
-  const [chatList, setChatList] = useState([]);
+  const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
-    const fetchChats = async () => {
-      setLoading(true);
-      try {
-        const result = await getChats();
-        if (!active) return;
-        const chats = Array.isArray(result) ? result : (result?.items ?? result?.data ?? []);
-        setChatList(chats);
-        
-        // Auto-redirect to first chat if no chatId is provided
-        if (!chatId && chats.length > 0) {
-          const firstChatId = chats[0].chatId ?? chats[0].id ?? chats[0].ChatId ?? chats[0].Id;
-          if (firstChatId) {
-            navigate(`/client/messages/${firstChatId}`, { replace: true });
-          }
+    getChats()
+      .then((data) => {
+        if (active) {
+          const chatsData = Array.isArray(data) ? data : (data?.items ?? data?.data ?? []);
+          setChats(chatsData);
         }
-      } catch (err) {
-        console.error('Failed to load chat list', err);
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error('Could not load conversations.');
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
 
-    fetchChats();
-    return () => { active = false; };
-  }, [chatId, navigate]);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Find the active chat object from the list
+  const activeChat = chats.find(c => {
+    const cId = getProp(c, 'id') || getProp(c, 'chatId');
+    return String(cId) === String(chatId);
+  });
 
   return (
-    <div className="main-container max-w-[1200px] !px-4 !py-4" style={{ height: 'calc(100vh - 70px)' }}>
-      <div className="chat-container h-full w-full bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col md:flex-row">
-        {loading ? (
-          <div className="flex w-full h-full items-center justify-center bg-gray-50 text-gray-500">
-            Loading conversations...
-          </div>
-        ) : (
-          <>
-            <ChatSidebar chats={chatList} />
-            <ChatWindow chatId={chatId} chatList={chatList} />
-          </>
-        )}
-      </div>
+    <div className="chat-container h-full w-full max-h-[calc(100vh-70px)]">
+      {/* ── Left — conversation list ──────────────────────────────────────── */}
+      <ChatSidebar chats={chats} setChats={setChats} loading={loading} />
+
+      {/* ── Right — chat window ───────────────────────────────────────────── */}
+      <ChatWindow key={chatId || 'none'} chatId={chatId} initialActiveChat={activeChat} />
     </div>
   );
 }

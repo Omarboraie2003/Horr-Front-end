@@ -110,45 +110,130 @@ code {
   background: var(--code-bg);
 }
 
-/* === Contracts & Chat Styles (ported from Horr-Freelancer) === */
+/* === Contracts Styles (exact match to Horr-Freelancer structure) === */
 
+.contract-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background: transparent;
+}
+
+.contract-item:last-child {
+  border-bottom: none;
+}
+
+.contract-item:hover {
+  background-color: var(--code-bg);
+  margin: 0 -24px;
+  padding: 24px;
+}
+
+.contract-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-h);
+  margin: 0 0 4px 0;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.2s;
+}
+
+.contract-item:hover .contract-info h3 {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+.client-info {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.date-range {
+  font-size: 12px;
+  color: var(--text);
+  opacity: 0.85;
+}
+
+.contract-meta {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.contract-rate {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.contract-status {
+  font-size: 12px;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background-color: var(--border);
+  color: var(--text);
+}
+
+.status-active {
+  background-color: rgba(46, 125, 50, 0.15);
+  color: #2e7d32;
+}
+
+.status-closed {
+  background-color: rgba(0, 0, 0, 0.06);
+  color: var(--text);
+}
+
+/* Contract Page Layout */
 .main-container {
-  max-width: 960px;
-  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 4rem;
+  padding: 24px;
 }
 
 .content-card {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 2rem;
+  overflow: hidden;
+  margin-bottom: 30px;
 }
 
 .tabs-header {
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border);
   display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 1.5rem;
+  gap: 24px;
 }
 
 .tab-btn {
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  padding: 0.65rem 1.4rem;
-  font-family: inherit;
-  font-size: 0.9rem;
+  padding: 16px 0;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text);
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  position: relative;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.2s;
 }
+
 .tab-btn:hover {
   color: var(--text-h);
 }
+
 .tab-btn.active {
   color: var(--text-h);
   font-weight: 600;
@@ -156,286 +241,193 @@ code {
 }
 
 .tab-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  display: none;
+  padding: 24px;
 }
 
-.contract-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.1rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg);
-  transition: box-shadow 0.2s, transform 0.18s, border-color 0.2s;
-}
-.contract-item:hover {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
-}
-.contract-item[style*="pointer"]:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent-border);
-}
-
-.contract-info {
-  flex: 1;
-  min-width: 0;
-}
-.contract-info h3 {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-h);
-  margin: 0 0 0.3rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.contract-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.78rem;
-  color: var(--text);
-}
-.contract-meta span + span::before {
-  content: '·';
-  margin-right: 0.75rem;
-  color: var(--border);
-}
-
-.contract-status {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.25rem 0.7rem;
-  border-radius: 20px;
-  flex-shrink: 0;
-}
-
-.status-active {
-  background: rgba(46, 125, 50, 0.1);
-  color: #2e7d32;
-}
-
-.status-closed {
-  background: rgba(0, 0, 0, 0.06);
-  color: var(--text);
-}
-
-.contract-rate {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-h);
-  flex-shrink: 0;
-  letter-spacing: -0.01em;
+.tab-content.active {
+  display: block;
 }
 
 .view-details-btn {
-  background: var(--accent-bg);
-  color: var(--accent);
+  display: block;
+  margin-top: 8px;
+  background: none;
   border: 1px solid var(--accent-border);
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.4rem 0.9rem;
-  border-radius: 8px;
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s, color 0.15s;
+  transition: all 0.2s;
+  margin-left: auto;
 }
+
 .view-details-btn:hover {
   background: var(--accent);
   color: #fff;
 }
 
 .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 3.5rem 1rem;
-  color: var(--text);
-}
-.empty-state svg {
-  opacity: 0.35;
-}
-.empty-state p {
-  font-size: 0.95rem;
-  font-weight: 500;
+  gap: 8px;
 }
 
+/* Contract Details Layout */
 .details-card {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 2rem 2.25rem;
+  padding: 32px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
 .contract-header {
   display: flex;
-  align-items: flex-start;
   justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  padding-bottom: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
   border-bottom: 1px solid var(--border);
 }
 
-.header-left {
-  flex: 1;
-  min-width: 0;
+.header-left h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--text-h);
+}
+
+.client-subtitle {
+  font-size: 16px;
+  color: var(--text);
 }
 
 .header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.75rem;
-  flex-shrink: 0;
+  text-align: right;
 }
 
 .header-buttons {
   display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
-.client-subtitle {
-  font-size: 0.88rem;
+.btn-deliver {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+  box-shadow: var(--shadow);
+}
+
+.btn-deliver:hover {
+  opacity: 0.9;
+}
+
+.btn-message {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   color: var(--text);
-  margin-top: 0.3rem;
+  transition: all 0.2s;
+}
+
+.btn-message:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
 }
 
 .section-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
   color: var(--text-h);
-  margin-bottom: 0.85rem;
-  letter-spacing: -0.01em;
 }
 
 .terms-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-  padding: 1.25rem;
-  background: var(--code-bg);
-  border-radius: 12px;
-  border: 1px solid var(--border);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
 }
 
 .term-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
+
 .term-item .term-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: block;
+  font-size: 14px;
   color: var(--text);
+  margin-bottom: 4px;
 }
+
 .term-item .term-value {
-  font-size: 0.95rem;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-h);
 }
 
 .description-box {
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-h);
   padding: 1rem 1.25rem;
   background: var(--code-bg);
   border-radius: 10px;
   border: 1px solid var(--border);
-  white-space: pre-wrap;
 }
 
+/* Review Styles */
 .feedback-section {
-  padding-top: 1.5rem;
+  padding-top: 24px;
   border-top: 1px solid var(--border);
 }
 
 .feedback-textarea {
   width: 100%;
-  min-height: 100px;
-  padding: 0.85rem 1rem;
+  min-height: 120px;
+  padding: 16px;
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 15px;
   color: var(--text-h);
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   resize: vertical;
-  margin-top: 0.75rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.feedback-textarea:focus {
   outline: none;
+  transition: border-color 0.2s;
+}
+
+.feedback-textarea:focus {
   border-color: var(--accent-border);
-  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .star-rating {
-  display: inline-flex;
-  gap: 0.15rem;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.btn-deliver {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--accent);
-  color: #fff;
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.55rem 1.15rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s, transform 0.15s, box-shadow 0.18s;
-  box-shadow: 0 2px 8px rgba(170, 59, 255, 0.2);
-}
-.btn-deliver:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(170, 59, 255, 0.3);
-}
-.btn-deliver:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-message {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: var(--bg);
-  color: var(--text-h);
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  padding: 0.55rem 1.15rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-.btn-message:hover {
-  background: var(--code-bg);
-  border-color: var(--accent-border);
-}

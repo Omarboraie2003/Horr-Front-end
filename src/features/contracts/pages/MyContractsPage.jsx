@@ -128,12 +128,8 @@ export default function MyContractsPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="main-container">
+    <div className="main-container mx-auto">
       <div className="content-card">
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-          My Contracts
-        </h1>
-
         {/* Tabs */}
         <div className="tabs-header">
           <button
@@ -158,53 +154,68 @@ export default function MyContractsPage() {
         )}
 
         {/* Content */}
-        <div className="tab-content">
-          {loading ? (
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          ) : filtered.length === 0 ? (
-            <div className="empty-state">
-              <Briefcase size={48} strokeWidth={1.4} />
-              <p>
-                {tab === 'active'
-                  ? 'No active contracts yet'
-                  : 'No contract history yet'}
-              </p>
-            </div>
-          ) : (
-            filtered.map((c) => {
-              const clickable = isActive(c.status);
-              return (
-                <div
-                  key={c.id}
-                  className="contract-item"
-                  style={{ cursor: clickable ? 'pointer' : 'default' }}
-                  onClick={clickable ? () => navigate(`/client/contracts/${c.id}`) : undefined}
-                >
-                  <div className="contract-info">
-                    <h3>{c.title}</h3>
+        <div className="tab-content active">
+          <h1 className="page-title">
+            {tab === 'active' ? 'Active Contracts' : 'Closed Contracts'}
+          </h1>
+
+          <div className="contract-list">
+            {loading ? (
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : filtered.length === 0 ? (
+              <div className="empty-state">
+                <Briefcase size={48} strokeWidth={1.4} />
+                <p>
+                  {tab === 'active'
+                    ? 'No active contracts yet'
+                    : 'No contract history yet'}
+                </p>
+              </div>
+            ) : (
+              filtered.map((c) => {
+                const clickable = isActive(c.status);
+                return (
+                  <div
+                    key={c.id}
+                    className="contract-item"
+                    style={{ cursor: clickable ? 'pointer' : 'default' }}
+                    onClick={clickable ? () => navigate(`/client/contracts/${c.id}`) : undefined}
+                  >
+                    <div className="contract-info">
+                      <h3>{c.title}</h3>
+                      <div className="client-info">Freelancer: {c.freelancerName}</div>
+                      <div className="date-range">Started: {formatDate(c.startedAt)}</div>
+                    </div>
                     <div className="contract-meta">
-                      <span>{c.freelancerName}</span>
-                      <span>Started {formatDate(c.startedAt)}</span>
+                      <div className="contract-rate">{currencyFmt.format(c.agreedRate)}</div>
+                      <span className={`contract-status ${statusClass(c.status)}`}>
+                        {statusLabel(c.status)}
+                      </span>
+                      {clickable && (
+                        <button
+                          className="view-details-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/client/contracts/${c.id}`);
+                          }}
+                        >
+                          View Details
+                        </button>
+                      )}
                     </div>
                   </div>
-                  <div className="contract-rate">{currencyFmt.format(c.agreedRate)}</div>
-                  <span className={`contract-status ${statusClass(c.status)}`}>
-                    {statusLabel(c.status)}
-                  </span>
-                  {clickable && <button className="view-details-btn">View Details</button>}
-                </div>
               );
             })
           )}
         </div>
-
-        {/* Pagination */}
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
     </div>
-  );
+
+    <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+  </div>
+);
 }

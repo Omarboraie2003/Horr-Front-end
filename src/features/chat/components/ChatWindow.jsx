@@ -7,7 +7,7 @@ import useChatConnection from '../../../hooks/useChatConnection';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
 
-export default function ChatWindow({ chatId, chatList }) {
+export default function ChatWindow({ chatId, chatList, initialActiveChat }) {
   const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const currentUserId = user?.id || user?.userId || user?.Id;
@@ -21,14 +21,14 @@ export default function ChatWindow({ chatId, chatList }) {
   const scrollRef = useRef(null);
 
   // Find metadata for header
-  const chatMetadata = chatList?.find(c => {
+  const chatMetadata = initialActiveChat ?? chatList?.find(c => {
     const cid = c.chatId ?? c.id ?? c.ChatId ?? c.Id;
     return String(cid) === String(chatId);
   });
   
-  const contractTitle = chatMetadata?.contractTitle ?? chatMetadata?.ContractTitle ?? chatMetadata?.title ?? chatMetadata?.Title ?? 'Chat';
-  const freelancerName = chatMetadata?.freelancerName ?? chatMetadata?.FreelancerName ?? 'Freelancer';
   const contractId = chatMetadata?.contractId ?? chatMetadata?.ContractId;
+  const contractTitle = chatMetadata?.contractTitle ?? chatMetadata?.ContractTitle ?? chatMetadata?.title ?? chatMetadata?.Title ?? (contractId ? `Contract #${contractId}` : 'Chat');
+  const freelancerName = chatMetadata?.otherPartyName ?? chatMetadata?.OtherPartyName ?? chatMetadata?.freelancerName ?? chatMetadata?.FreelancerName ?? 'Freelancer';
 
   // Initial Load
   useEffect(() => {

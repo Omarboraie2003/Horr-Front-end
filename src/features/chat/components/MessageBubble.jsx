@@ -1,8 +1,8 @@
 import React from 'react';
 
 export default function MessageBubble({ message, isOwnMessage }) {
-  const text = message.text ?? message.Text ?? message.content ?? '';
-  const timestamp = message.createdAt ?? message.CreatedAt ?? message.timestamp ?? new Date().toISOString();
+  const text = message.body ?? message.Body ?? message.textContent ?? message.TextContent ?? message.text ?? message.Text ?? message.content ?? '';
+  const timestamp = message.sentAt ?? message.SentAt ?? message.createdAt ?? message.CreatedAt ?? message.timestamp ?? new Date().toISOString();
   
   // Format the time
   let timeStr = '';
@@ -13,7 +13,7 @@ export default function MessageBubble({ message, isOwnMessage }) {
   }
 
   // Handle file attachments if any
-  const attachmentUrl = message.attachmentUrl ?? message.AttachmentUrl;
+  const attachmentUrl = message.fileUrl ?? message.FileUrl ?? message.attachmentUrl ?? message.AttachmentUrl;
   const fileName = message.fileName ?? message.FileName;
 
   return (
