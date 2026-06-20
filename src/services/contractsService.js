@@ -41,5 +41,9 @@ export const contractsService = {
   requestAdditionalRevisions: async (payload) => {
     const res = await apiClient.post(ENDPOINTS.REVISIONS.REQUEST_ADDITIONAL, payload);
     return res.data?.data ?? res.data;
+  },
+  downloadReceipt: async (requestId) => {
+    const res = await apiClient.get(`/api/billing/deposit-requests/${requestId}/receipt`, { responseType: 'blob' });
+    return res.data?.data ?? res.data;
   }
 };

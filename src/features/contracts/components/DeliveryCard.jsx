@@ -12,7 +12,8 @@ export default function DeliveryCard({
   onRevision, 
   onDispute, 
   onDownloadAttachment,
-  onRefresh
+  onRefresh,
+  isRevisionDisabled
 }) {
     
   const [activeAction, setActiveAction] = useState(null); // 'REVISION' | 'DISPUTE' | 'ADDITIONAL_REVISION'
@@ -330,8 +331,9 @@ export default function DeliveryCard({
 
               <button
                 onClick={() => { setActiveAction('REVISION'); setReason(''); setError(''); }}
-                disabled={isSubmitting}
-                className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm transition disabled:opacity-50"
+                disabled={isSubmitting || isRevisionDisabled}
+                title={isRevisionDisabled ? "No revisions remaining. Please request additional revisions." : undefined}
+                className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 shadow-sm transition disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
               >
                 <Edit3 className="h-4 w-4 mr-1.5 text-gray-500" />
                 {'Request Revision'}

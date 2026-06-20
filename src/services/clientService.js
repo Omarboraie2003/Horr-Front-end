@@ -102,6 +102,11 @@ export const getMyDepositRequests = async (page = 1, pageSize = 10) => {
   return response.data?.data || response.data;
 };
 
+export const downloadReceipt = async (requestId) => {
+  const response = await apiClient.get(`/Billing/deposit-requests/${requestId}/receipt`, { responseType: 'blob' });
+  return response.data?.data || response.data;
+};
+
 export const addPaymentMethod = async (paymentData) => {
   const response = await apiClient.post(ENDPOINTS.USER_PROFILE.PAYMENT_METHOD, paymentData);
   return response.data;

@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
-import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod, updatePaymentMethod, submitDepositRequest, getMyDepositRequests } from '../../../services/clientService';
+import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod, updatePaymentMethod, submitDepositRequest, getMyDepositRequests, downloadReceipt } from '../../../services/clientService';
 import useFetch from '../../../hooks/useFetch';
 import { toast } from 'sonner';
 import Pagination from '../../contracts/components/Pagination';
+import { BASE_URL } from '../../../services/apiClient';
 
 const InstaPayLogo = () => (
   <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -43,6 +44,12 @@ const getMethodType = (methodName) => {
   if (normalized.includes('insta')) return 'insta';
   if (normalized.includes('wallet') || normalized.includes('e-wallet') || normalized.includes('ewallet')) return 'wallet';
   return 'unknown';
+};
+
+const getReceiptUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BASE_URL}${path}`;
 };
 
 const DepositStatusBadge = ({ status }) => {
@@ -105,6 +112,23 @@ const BillingSection = () => {
   const [page, setPage] = useState(1);
   const fetchMyRequests = useCallback(() => getMyDepositRequests(page, 10), [page]);
   const { data: historyData, loading: historyLoading, refetch: refreshHistory } = useFetch(fetchMyRequests, true);
+
+  const handleDownloadReceipt = async (reqId, receiptNum) => {
+    try {
+      const blob = await downloadReceipt(reqId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt_${receiptNum || reqId}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('[BillingSection] download error:', err);
+      toast.error('Failed to download receipt');
+    }
+  };
 
   const handleAddMethod = async () => {
     if (!identifier.trim()) {
@@ -451,14 +475,12 @@ const BillingSection = () => {
                             
                             {reqPhotoUrl && (
                               <div className="flex items-center">
-                                <a 
-                                  href={reqPhotoUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
+                                <button 
+                                  onClick={() => handleDownloadReceipt(reqId, reqReceiptNum)}
                                   className="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-700 font-bold bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-xl transition-all"
                                 >
                                   📄 View Receipt
-                                </a>
+                                </button>
                               </div>
                             )}
                           </div>

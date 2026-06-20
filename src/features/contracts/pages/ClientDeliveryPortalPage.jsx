@@ -42,9 +42,16 @@ export default function ClientDeliveryPortalPage() {
     return new Date(dateB).getTime() - new Date(dateA).getTime();
   }) : [];
   const latestDeliveryId = pendingDelivery?.id || sortedDeliveriesForId[0]?.id;
-
-  const maxRevisionsVal = contract?.maxRevisions ?? contract?.MaxRevisions ?? contract?.revisionsIncluded ?? contract?.numberOfRevisions;
-  const isZeroRevisions = maxRevisionsVal !== undefined && (String(maxRevisionsVal) === '0' || Number(maxRevisionsVal) === 0);
+ 
+  const maxRevisions = contract?.maxRevisions ?? contract?.MaxRevisions ?? 0;
+  const totalRevisionsRequested = deliveries?.reduce((sum, d) => {
+    const revs = d.revisionRequests || d.RevisionRequests || [];
+    let count = Array.isArray(revs) ? revs.length : 0;
+    if (d.revisionRequest || d.RevisionRequest) count += 1;
+    return sum + count;
+  }, 0) || 0;
+  const revisionsRemaining = Math.max(0, maxRevisions - totalRevisionsRequested);
+  const isZeroRevisions = revisionsRemaining === 0;
 
   // Handlers
   const handleApprove = async (deliveryId) => {
@@ -162,6 +169,7 @@ export default function ClientDeliveryPortalPage() {
               onDispute={!isCompleted ? handleDispute : undefined}
               onDownloadAttachment={(id, name) => downloadAttachment(id, name)}
               onRefresh={() => { refetchContract(); refetchDeliveries(); }}
+              isRevisionDisabled={isZeroRevisions}
             />
           )}
         </div>
@@ -212,36 +220,41 @@ export default function ClientDeliveryPortalPage() {
             </div>
           )}
 
-          {/* Revisions Info */}
+          {/* Revisions Info / Tracker */}
           <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center gap-2 text-indigo-800 mb-2">
               <RefreshCcw className="h-5 w-5" />
-              <h3 className="font-semibold text-sm uppercase tracking-wide">Max Revisions</h3>
+              <h3 className="font-semibold text-sm uppercase tracking-wide">Max Revisions Tracker</h3>
             </div>
-            {isZeroRevisions ? (
-              <div className="space-y-3">
-                <p className="text-indigo-700 text-sm leading-relaxed">
-                  No revisions remaining.
-                </p>
-                {!isCompleted && latestDeliveryId && (
-                  <button
-                    onClick={() => {
-                      setAdditionalReason('');
-                      setAdditionalError('');
-                      setRequestedCount(2);
-                      setIsAdditionalModalOpen(true);
-                    }}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition animate-in fade-in duration-200"
-                  >
-                    Request Additional Revisions
-                  </button>
-                )}
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-xs text-indigo-700">
+                <span>Total Allowed:</span>
+                <span className="font-bold">{maxRevisions}</span>
               </div>
-            ) : (
-              <p className="text-indigo-700 text-sm leading-relaxed">
-                <span className="font-bold">{maxRevisionsVal ?? 'Unlimited'}</span> revisions allowed for this contract.
-              </p>
-            )}
+              <div className="flex justify-between items-center text-xs text-indigo-700">
+                <span>Used Revisions:</span>
+                <span className="font-bold text-amber-700">{totalRevisionsRequested}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs text-indigo-700 border-t border-indigo-200 pt-2 font-semibold">
+                <span>Remaining:</span>
+                <span className={`text-sm ${revisionsRemaining === 0 ? 'text-rose-600 font-extrabold' : 'text-indigo-800 font-bold'}`}>
+                  {revisionsRemaining} allowed
+                </span>
+              </div>
+              {isZeroRevisions && !isCompleted && latestDeliveryId && (
+                <button
+                  onClick={() => {
+                    setAdditionalReason('');
+                    setAdditionalError('');
+                    setRequestedCount(2);
+                    setIsAdditionalModalOpen(true);
+                  }}
+                  className="w-full mt-2 inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition animate-in fade-in duration-200"
+                >
+                  Request Additional Revisions
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
