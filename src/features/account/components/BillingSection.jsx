@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod, updatePaymentMethod } from '../../../services/clientService';
+import { useState, useCallback } from 'react';
+import { getWalletBalance, addPaymentMethod, getOnboardingStatus, getUserPaymentMethods, deletePaymentMethod, updatePaymentMethod, submitDepositRequest, getMyDepositRequests } from '../../../services/clientService';
 import useFetch from '../../../hooks/useFetch';
 import { toast } from 'sonner';
+import Pagination from '../../contracts/components/Pagination';
 
 const InstaPayLogo = () => (
   <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,8 +45,41 @@ const getMethodType = (methodName) => {
   return 'unknown';
 };
 
+const DepositStatusBadge = ({ status }) => {
+  const normalized = (status || '').toLowerCase();
+  let bg = 'bg-amber-100 text-amber-700 border-amber-200';
+  let label = status || 'Pending';
+
+  if (normalized === 'approved') {
+    bg = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+  } else if (normalized === 'rejected') {
+    bg = 'bg-rose-100 text-rose-700 border-rose-200';
+  }
+
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${bg}`}>
+      {label}
+    </span>
+  );
+};
+
+const HistorySkeleton = () => (
+  <div className="space-y-4 animate-pulse">
+    {[1, 2, 3].map(n => (
+      <div key={n} className="bg-slate-50 border border-slate-200 rounded-3xl p-5 flex items-center justify-between">
+        <div>
+          <div className="h-5 bg-slate-200 rounded w-24 mb-2"></div>
+          <div className="h-4 bg-slate-200 rounded w-48 mb-1"></div>
+          <div className="h-3 bg-slate-200 rounded w-32"></div>
+        </div>
+        <div className="h-6 bg-slate-200 rounded-full w-20"></div>
+      </div>
+    ))}
+  </div>
+);
+
 const BillingSection = () => {
-  const { data: balanceData, loading: balanceLoading } = useFetch(getWalletBalance);
+  const { data: balanceData, loading: balanceLoading, refetch: refreshBalance } = useFetch(getWalletBalance);
   const { refetch: refreshOnboarding } = useFetch(getOnboardingStatus);
   const { data: paymentMethods, loading: paymentLoading, refetch: refreshPaymentMethods } = useFetch(getUserPaymentMethods);
   const [isAddingMethod, setIsAddingMethod] = useState(false);
@@ -58,6 +92,20 @@ const BillingSection = () => {
   const [editIdentifier, setEditIdentifier] = useState('');
   const [updating, setUpdating] = useState(false);
 
+  // State for Deposit Request
+  const [isDepositing, setIsDepositing] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositReceiptNumber, setDepositReceiptNumber] = useState('');
+  const [depositPhoto, setDepositPhoto] = useState(null);
+  const [depositPhotoPreview, setDepositPhotoPreview] = useState('');
+  const [depositSubmitting, setDepositSubmitting] = useState(false);
+  const [depositErrors, setDepositErrors] = useState({});
+
+  // Paginated Deposit requests history list
+  const [page, setPage] = useState(1);
+  const fetchMyRequests = useCallback(() => getMyDepositRequests(page, 10), [page]);
+  const { data: historyData, loading: historyLoading, refetch: refreshHistory } = useFetch(fetchMyRequests, true);
+
   const handleAddMethod = async () => {
     if (!identifier.trim()) {
       toast.error('Please enter your account identifier.');
@@ -67,7 +115,7 @@ const BillingSection = () => {
     try {
       const payload = {
         methodName: paymentType === 'insta' ? 'InstaPay' : 'E-Wallet',
-        accountIdentifier: identifier
+        accountIdentifier: paymentType === 'insta' ? `${identifier.trim()}@instapay` : identifier.trim()
       };
       await addPaymentMethod(payload);
       toast.success('Billing method added successfully!');
@@ -103,7 +151,7 @@ const BillingSection = () => {
     try {
       const payload = {
         methodName: type === 'insta' ? 'InstaPay' : 'E-Wallet',
-        accountIdentifier: editIdentifier
+        accountIdentifier: type === 'insta' ? `${editIdentifier.trim()}@instapay` : editIdentifier.trim()
       };
       await updatePaymentMethod(methodId, payload);
       toast.success('Billing method updated successfully!');
@@ -116,20 +164,108 @@ const BillingSection = () => {
     }
   };
 
+  const validateDepositForm = () => {
+    const errors = {};
+    const amountVal = parseFloat(depositAmount);
+    if (!depositAmount || isNaN(amountVal) || amountVal <= 0) {
+      errors.amount = 'Please enter a valid deposit amount greater than 0.';
+    }
+    if (!depositReceiptNumber.trim()) {
+      errors.receiptNumber = 'Receipt number is required.';
+    }
+    if (!depositPhoto) {
+      errors.receiptPhoto = 'Receipt photo is required.';
+    } else if (depositPhoto.size > 5 * 1024 * 1024) {
+      errors.receiptPhoto = 'File size must not exceed 5MB.';
+    }
+    setDepositErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleDepositSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateDepositForm()) {
+      return;
+    }
+    setDepositSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append('Amount', parseFloat(depositAmount));
+      formData.append('ReceiptNumber', depositReceiptNumber.trim());
+      formData.append('ReceiptPhoto', depositPhoto);
+
+      await submitDepositRequest(formData);
+      toast.success('Deposit request submitted successfully!');
+      
+      setDepositAmount('');
+      setDepositReceiptNumber('');
+      setDepositPhoto(null);
+      setDepositPhotoPreview('');
+      setDepositErrors({});
+      setIsDepositing(false);
+
+      await Promise.all([refreshBalance(), refreshHistory()]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDepositSubmitting(false);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setDepositErrors(prev => ({ ...prev, receiptPhoto: 'Only image files are allowed.' }));
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setDepositErrors(prev => ({ ...prev, receiptPhoto: 'File size must not exceed 5MB.' }));
+        return;
+      }
+      setDepositPhoto(file);
+      setDepositErrors(prev => {
+        const copy = { ...prev };
+        delete copy.receiptPhoto;
+        return copy;
+      });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDepositPhotoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleClearFile = () => {
+    setDepositPhoto(null);
+    setDepositPhotoPreview('');
+  };
+
   return (
     <div id="billing" className="animate-in fade-in duration-500">
       <h1 className="text-3xl font-bold mb-8 text-gray-900">Billing & Payments</h1>
 
-      {!isAddingMethod ? (
+      {!isAddingMethod && !isDepositing ? (
         <div id="billing-view">
-          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 mb-8 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Outstanding balance</h3>
-            <div className="text-5xl font-bold text-gray-900 my-2">
-              {balanceLoading ? '...' : `${(balanceData?.balanceEGP ?? 0).toFixed(2)} EGP`}
+          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 mb-8 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 mb-3 uppercase tracking-wider">Outstanding balance</h3>
+              <div className="text-5xl font-bold text-gray-900 my-2">
+                {balanceLoading ? '...' : `${(balanceData?.balanceEGP ?? 0).toFixed(2)} EGP`}
+              </div>
+              <div className="flex items-center gap-3 text-gray-500 font-medium">
+                <span>≈ {balanceLoading ? '...' : ((balanceData?.balanceEGP ?? 0) / 48).toFixed(2)} USD</span>
+                <span className="text-xs px-2 py-1 bg-white rounded-md border border-gray-100">1 USD = 48.00 EGP</span>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-gray-500 font-medium">
-              <span>≈ {balanceLoading ? '...' : ((balanceData?.balanceEGP ?? 0) / 48).toFixed(2)} USD</span>
-              <span className="text-xs px-2 py-1 bg-white rounded-md border border-gray-100">1 USD = 48.00 EGP</span>
+            <div>
+              <button
+                className="w-full md:w-auto px-8 py-3 rounded-full font-bold text-sm bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                onClick={() => setIsDepositing(true)}
+              >
+                Deposit Funds
+              </button>
             </div>
           </div>
 
@@ -169,7 +305,11 @@ const BillingSection = () => {
                               <button
                                 onClick={() => {
                                   setEditingId(method.id);
-                                  setEditIdentifier(method.accountIdentifier);
+                                  setEditIdentifier(
+                                    isInsta && method.accountIdentifier.endsWith('@instapay')
+                                      ? method.accountIdentifier.slice(0, -9)
+                                      : method.accountIdentifier
+                                  );
                                 }}
                                 className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-gray-400 hover:text-amber-600 p-1.5 hover:bg-amber-50 rounded-lg"
                                 title="Edit payment method"
@@ -194,14 +334,21 @@ const BillingSection = () => {
                       {isEditing ? (
                         <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                           <div className="flex flex-col sm:flex-row gap-3">
-                            <input 
-                              type="text" 
-                              className="flex-1 px-4 py-2.5 border border-slate-300 rounded-xl bg-white text-gray-900 text-sm focus:border-amber-500 focus:ring-4 focus:ring-amber-100 outline-none transition-all" 
-                              value={editIdentifier}
-                              onChange={e => setEditIdentifier(e.target.value)}
-                              placeholder={isInsta ? "username@instapay or 01xxxxxxxxx" : "10xxxxxxxxx"}
-                              autoFocus
-                            />
+                            <div className="flex-1 flex items-center bg-white border border-slate-300 rounded-xl focus-within:border-amber-500 focus-within:ring-4 focus-within:ring-amber-100 transition-all overflow-hidden">
+                              <input 
+                                type="text" 
+                                className="flex-1 px-4 py-2.5 bg-transparent text-gray-900 text-sm outline-none" 
+                                value={editIdentifier}
+                                onChange={e => setEditIdentifier(e.target.value)}
+                                placeholder={isInsta ? "username" : "10xxxxxxxxx"}
+                                autoFocus
+                              />
+                              {isInsta && (
+                                <span className="px-4 py-2.5 bg-slate-100 border-l border-slate-300 text-gray-500 text-sm font-semibold select-none">
+                                  @instapay
+                                </span>
+                              )}
+                            </div>
                             <div className="flex gap-2">
                               <button 
                                 onClick={() => handleUpdateMethod(method.id, type)}
@@ -252,8 +399,92 @@ const BillingSection = () => {
               Your billing method will be charged only when you hire a freelancer or purchase a service.
             </p>
           </div>
+
+          {/* Deposit Requests History Card */}
+          <div className="bg-white rounded-3xl shadow-sm border border-black/5 p-6 md:p-8 mb-8 hover:shadow-lg transition-all duration-300">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Deposit Requests History</h3>
+
+            {historyLoading ? (
+              <HistorySkeleton />
+            ) : (() => {
+              const historyItems = historyData?.items || historyData?.Items || (Array.isArray(historyData) ? historyData : []);
+              const totalCount = historyData?.totalCount || historyData?.TotalCount || 0;
+              const totalPages = historyData?.totalPages || historyData?.TotalPages || Math.ceil(totalCount / 10) || 1;
+
+              if (historyItems.length === 0) {
+                return (
+                  <div className="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-center">
+                    <p className="text-slate-500 text-sm font-medium">
+                      No deposit requests found. You can submit one by clicking "Deposit Funds" above.
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  <div className="space-y-4">
+                    {historyItems.map((req) => {
+                      const reqId = req.id || req.Id;
+                      const reqAmount = req.amount ?? req.Amount ?? 0;
+                      const reqReceiptNum = req.receiptNumber ?? req.ReceiptNumber ?? '';
+                      const reqCreatedAt = req.createdAt ?? req.CreatedAt ?? '';
+                      const reqStatus = req.status ?? req.Status ?? 'Pending';
+                      const reqAdminNote = req.adminNote ?? req.AdminNote ?? '';
+                      const reqPhotoUrl = req.receiptPhotoUrl ?? req.ReceiptPhotoUrl ?? '';
+
+                      return (
+                        <div key={reqId} className="bg-slate-50 border border-slate-200 rounded-3xl p-5 shadow-sm transition duration-300 hover:shadow-lg">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-lg font-bold text-gray-900">
+                                  EGP {Number(reqAmount).toFixed(2)}
+                                </span>
+                                <DepositStatusBadge status={reqStatus} />
+                              </div>
+                              <div className="text-xs text-gray-500 mt-2 space-y-1">
+                                <p>Receipt ID: <span className="font-semibold text-gray-700">{reqReceiptNum}</span></p>
+                                <p>Submitted: {formatAddedDate(reqCreatedAt)}</p>
+                              </div>
+                            </div>
+                            
+                            {reqPhotoUrl && (
+                              <div className="flex items-center">
+                                <a 
+                                  href={reqPhotoUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-xs text-amber-600 hover:text-amber-700 font-bold bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-xl transition-all"
+                                >
+                                  📄 View Receipt
+                                </a>
+                              </div>
+                            )}
+                          </div>
+
+                          {reqAdminNote && (
+                            <div className="mt-4 pt-3 border-t border-slate-200/60 text-xs text-gray-600">
+                              <span className="font-bold text-gray-700">Admin Note: </span>
+                              {reqAdminNote}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={(p) => setPage(p)}
+                  />
+                </div>
+              );
+            })()}
+          </div>
         </div>
-      ) : (
+      ) : isAddingMethod ? (
         <div id="billing-add" className="bg-white rounded-3xl shadow-card-lg border border-black/5 p-6 md:p-8 mb-8 animate-in slide-in-from-bottom-4 duration-300">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-2xl font-bold text-gray-900">Add a billing method</h3>
@@ -289,15 +520,20 @@ const BillingSection = () => {
             {paymentType === 'insta' && (
               <div className="animate-in fade-in slide-in-from-left-2 duration-300">
                 <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide font-sans">
-                  InstaPay Address or Mobile Number
+                  InstaPay Username
                 </label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-amber-600 focus:ring-4 focus:ring-amber-100 focus:outline-none transition-all font-sans" 
-                  placeholder="e.g. username@instapay or 01xxxxxxxxx"
-                  value={identifier}
-                  onChange={e => setIdentifier(e.target.value)}
-                />
+                <div className="flex items-center bg-gray-50 border border-slate-200 rounded-lg focus-within:bg-white focus-within:border-amber-600 focus-within:ring-4 focus-within:ring-amber-100 focus-within:outline-none transition-all overflow-hidden font-sans">
+                  <input 
+                    type="text" 
+                    className="flex-1 px-4 py-3 bg-transparent text-gray-900 text-sm focus:outline-none" 
+                    placeholder="e.g. username"
+                    value={identifier}
+                    onChange={e => setIdentifier(e.target.value)}
+                  />
+                  <span className="px-4 py-3 bg-slate-100 border-l border-slate-200 text-gray-500 text-sm font-semibold select-none">
+                    @instapay
+                  </span>
+                </div>
               </div>
             )}
 
@@ -339,6 +575,129 @@ const BillingSection = () => {
               Cancel
             </button>
           </div>
+        </div>
+      ) : (
+        <div id="deposit-add" className="bg-white rounded-3xl shadow-card-lg border border-black/5 p-6 md:p-8 mb-8 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-2xl font-bold text-gray-900">Deposit Funds</h3>
+            <button
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              onClick={() => {
+                setIsDepositing(false);
+                setDepositAmount('');
+                setDepositReceiptNumber('');
+                setDepositPhoto(null);
+                setDepositPhotoPreview('');
+                setDepositErrors({});
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleDepositSubmit} className="space-y-6">
+            <div>
+              <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide font-sans">
+                Amount (EGP)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                className={`w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-amber-600 focus:ring-4 focus:ring-amber-100 focus:outline-none transition-all font-sans ${
+                  depositErrors.amount ? 'border-red-500 ring-4 ring-red-100' : 'border-slate-200'
+                }`}
+                placeholder="0.00"
+                value={depositAmount}
+                onChange={e => setDepositAmount(e.target.value)}
+              />
+              {depositErrors.amount && (
+                <p className="text-red-500 text-xs mt-1 font-semibold">{depositErrors.amount}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide font-sans">
+                Receipt / Transaction Number
+              </label>
+              <input
+                type="text"
+                className={`w-full px-4 py-3 border rounded-lg bg-gray-50 text-gray-900 text-sm focus:bg-white focus:border-amber-600 focus:ring-4 focus:ring-amber-100 focus:outline-none transition-all font-sans ${
+                  depositErrors.receiptNumber ? 'border-red-500 ring-4 ring-red-100' : 'border-slate-200'
+                }`}
+                placeholder="Enter receipt/transaction ID"
+                value={depositReceiptNumber}
+                onChange={e => setDepositReceiptNumber(e.target.value)}
+              />
+              {depositErrors.receiptNumber && (
+                <p className="text-red-500 text-xs mt-1 font-semibold">{depositErrors.receiptNumber}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block font-semibold text-sm mb-2 text-gray-900 tracking-wide font-sans">
+                Upload Receipt Photo
+              </label>
+              <div className="flex items-center gap-4">
+                <label className="cursor-pointer inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-semibold bg-white text-gray-700 hover:bg-gray-50 transition-colors">
+                  Choose File
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </label>
+                {depositPhoto && (
+                  <button
+                    type="button"
+                    onClick={handleClearFile}
+                    className="text-red-600 hover:text-red-700 text-xs font-semibold"
+                  >
+                    Clear File
+                  </button>
+                )}
+              </div>
+              {depositErrors.receiptPhoto && (
+                <p className="text-red-500 text-xs mt-1 font-semibold">{depositErrors.receiptPhoto}</p>
+              )}
+
+              {depositPhotoPreview && (
+                <div className="mt-4 border border-slate-200 rounded-2xl p-4 max-w-xs bg-slate-50 relative animate-in fade-in zoom-in-95 duration-200">
+                  <img
+                    src={depositPhotoPreview}
+                    alt="Receipt preview"
+                    className="max-h-40 rounded-xl object-contain mx-auto"
+                  />
+                  <p className="text-xs text-gray-500 mt-2 truncate text-center font-medium">{depositPhoto.name}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-4 mt-10">
+              <button
+                type="submit"
+                className="px-10 py-3 rounded-full font-bold text-sm bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-50"
+                disabled={depositSubmitting}
+              >
+                {depositSubmitting ? 'Submitting...' : 'Submit Request'}
+              </button>
+              <button
+                type="button"
+                className="px-10 py-3 rounded-full font-bold text-sm bg-white border border-gray-300 text-gray-900 hover:bg-gray-50 hover:border-gray-400 transition-all"
+                onClick={() => {
+                  setIsDepositing(false);
+                  setDepositAmount('');
+                  setDepositReceiptNumber('');
+                  setDepositPhoto(null);
+                  setDepositPhotoPreview('');
+                  setDepositErrors({});
+                }}
+                disabled={depositSubmitting}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

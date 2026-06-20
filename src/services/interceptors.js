@@ -1,4 +1,5 @@
 import { ENDPOINTS } from "./endpoints";
+import { toast } from "sonner";
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -13,6 +14,56 @@ const processQueue = (error, token = null) => {
   });
 
   failedQueue = [];
+};
+
+const getErrorMessage = (error) => {
+  let errorMsg = "";
+  let errorCode = "";
+  let errorsList = [];
+  
+  if (error.response?.data) {
+    const data = error.response.data;
+    const parts = [];
+    
+    const msg = data.message || data.Message || data.detail || data.Detail || data.title || data.Title;
+    if (msg) {
+      parts.push(msg);
+    }
+    
+    const errs = data.errors || data.Errors;
+    if (errs && Array.isArray(errs) && errs.length > 0) {
+      parts.push(errs.join(" "));
+      errorsList = errs;
+    } else if (typeof errs === "object" && errs !== null) {
+      const validationErrors = Object.entries(errs)
+        .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`)
+        .join(" ");
+      if (validationErrors) {
+        parts.push(validationErrors);
+      }
+      errorsList = Object.values(errs).flat();
+    } else if (typeof data === "string") {
+      parts.push(data);
+    }
+    
+    errorMsg = parts.join(" - ");
+    errorCode = data.errorCode || data.ErrorCode || error.response.status || "";
+  }
+  
+  if (!errorMsg) {
+    errorMsg = error.message || "An unexpected error occurred.";
+  }
+  
+  if (!errorCode) {
+    errorCode = error.code || "";
+  }
+  
+  return {
+    message: errorMsg,
+    errorCode: errorCode,
+    succeeded: false,
+    errors: errorsList
+  };
 };
 
 export const setupInterceptors = (axiosInstance) => {
@@ -83,6 +134,20 @@ export const setupInterceptors = (axiosInstance) => {
             });
         });
       }
+
+      // Don't toast/globally handle errors from refresh token calls to avoid double-alerts or login redirect issues
+      if (originalRequest.url?.includes(ENDPOINTS.AUTH.REFRESH_TOKEN)) {
+        return Promise.reject(error);
+      }
+
+      // Format error details and show error toast globally
+      const normalized = getErrorMessage(error);
+      error.message = normalized.message;
+      error.errorCode = normalized.errorCode;
+      error.errors = normalized.errors;
+      error.succeeded = false;
+
+      toast.error(normalized.errorCode ? `${normalized.message} (Code: ${normalized.errorCode})` : normalized.message);
 
       return Promise.reject(error);
     }

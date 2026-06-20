@@ -210,7 +210,7 @@ export default function PostJobPage() {
         setPosted(true);
       } catch (e) {
         console.error("Submit Error:", e);
-        setError(e.response?.data?.message || "Failed to post job. Please try again.");
+        setError(e.errorCode ? `${e.message} (Code: ${e.errorCode})` : e.message);
       } finally {
         setSubmitting(false);
       }

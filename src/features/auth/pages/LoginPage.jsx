@@ -43,11 +43,25 @@ function MicrosoftIcon() {
   );
 }
 
+function parseJwt(token) {
+  if (!token) return null;
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+    return {
+      userId: payload.userId || payload.sub || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+      email: payload.email || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
+      role: payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+      name: payload.name || payload.unique_name || payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name']
+    };
+  } catch (e) { return null; }
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated } = useAuth();
-  const [role, setRole] = useState("freelancer");
+  const { isAuthenticated, user } = useAuth();
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -55,10 +69,20 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/client/dashboard", { replace: true });
+    if (isAuthenticated && user) {
+      const userRole = user.role;
+      if (userRole === "Client" || userRole === "client") {
+        navigate("/client/dashboard", { replace: true });
+      } else if (userRole) {
+        const currentPort = window.location.port;
+        let targetUrl = "http://localhost:5173";
+        if (currentPort === "5174") {
+          targetUrl = "http://localhost:5173";
+        }
+        window.location.href = targetUrl;
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   // History Trap: Prevent going back after logout
   useEffect(() => {
@@ -91,10 +115,21 @@ export default function LoginPage() {
       // Backend returns the token directly on success
       localStorage.setItem("token", response);
 
-      // Update Redux state immediately
-      await dispatch(fetchMe());
+      const decoded = parseJwt(response);
+      const userRole = decoded?.role;
 
-      navigate("/client/dashboard");
+      if (userRole === "Client" || userRole === "client") {
+        // Update Redux state immediately
+        await dispatch(fetchMe());
+        navigate("/client/dashboard");
+      } else {
+        const currentPort = window.location.port;
+        let targetUrl = "http://localhost:5173";
+        if (currentPort === "5174") {
+          targetUrl = "http://localhost:5173";
+        }
+        window.location.href = targetUrl;
+      }
     } catch (err) {
       console.error("Full Login Error:", err);
       if (err.response?.data?.errors && Array.isArray(err.response.data.errors)) {
@@ -124,28 +159,6 @@ export default function LoginPage() {
           <p className="text-[10px] sm:text-[10.5px] tracking-[2.5px] sm:tracking-[3px] text-[#9b8c6a] font-medium uppercase font-sans">
             Hire Egyptian Talent Worldwide.
           </p>
-        </div>
-
-        {/* Role Toggle - Updated to match new separated style */}
-        <div className="flex gap-3 mb-7">
-          <button
-            onClick={() => setRole("freelancer")}
-            className={`flex-1 py-2.5 text-[14px] font-semibold rounded-[8px] transition-all duration-300 border ${role === "freelancer"
-                ? "bg-[#1a2332] text-[#c4a44a] border-[#c4a44a] shadow-sm"
-                : "bg-white text-[#1a2332] border-[#1a2332] hover:bg-gray-50"
-              }`}
-          >
-            Freelancer
-          </button>
-          <button
-            onClick={() => setRole("client")}
-            className={`flex-1 py-2.5 text-[14px] font-semibold rounded-[8px] transition-all duration-300 border ${role === "client"
-                ? "bg-[#1a2332] text-[#c4a44a] border-[#c4a44a] shadow-sm"
-                : "bg-white text-[#1a2332] border-[#1a2332] hover:bg-gray-50"
-              }`}
-          >
-            Client
-          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -218,27 +231,6 @@ export default function LoginPage() {
             Sign Up
           </Link>
         </p>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-5">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-[12px] text-gray-400 font-medium whitespace-nowrap">
-            Or continue with
-          </span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-
-        {/* Social Buttons */}
-        <div className="flex gap-3">
-          <button className="flex-1 flex items-center justify-center gap-2 py-[10px] rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[13px] font-semibold hover:border-[#a8853a] hover:bg-gray-50 transition-all duration-200 shadow-sm">
-            <GoogleIcon />
-            Continue with Google
-          </button>
-          <button className="flex-1 flex items-center justify-center gap-2 py-[10px] rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[13px] font-semibold hover:border-[#a8853a] hover:bg-gray-50 transition-all duration-200 shadow-sm">
-            <MicrosoftIcon />
-            Continue with Microsoft
-          </button>
-        </div>
       </div>
     </>
   );

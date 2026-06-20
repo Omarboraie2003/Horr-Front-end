@@ -17,6 +17,8 @@ export const ENDPOINTS = {
   },
   BILLING: {
     WALLET_BALANCE: '/Billing/wallet-balance',
+    DEPOSIT_REQUESTS: '/Billing/deposit-requests',
+    MY_DEPOSIT_REQUESTS: '/Billing/deposit-requests/my-requests',
   },
   AUTH: {
     LOGIN: '/Auth/login',
@@ -75,6 +77,9 @@ export const ENDPOINTS = {
     REVISION: (id) => `/deliveries/${id}/revision`,
     DISPUTE: (id) => `/deliveries/${id}/dispute`,
     DOWNLOAD: (id) => `/deliveries/attachments/${id}/download`,
+  },
+  REVISIONS: {
+    REQUEST_ADDITIONAL: '/revisions/additional/request',
   },
   CHAT: {
     LIST: '/chat',

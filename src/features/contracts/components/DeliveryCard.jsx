@@ -15,10 +15,11 @@ export default function DeliveryCard({
   onRefresh
 }) {
     
-  const [activeAction, setActiveAction] = useState(null); // 'REVISION' | 'DISPUTE'
+  const [activeAction, setActiveAction] = useState(null); // 'REVISION' | 'DISPUTE' | 'ADDITIONAL_REVISION'
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [requestedCount, setRequestedCount] = useState(2);
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewerType, setReviewerType] = useState(null); // 'AI' | 'Human'
@@ -81,6 +82,7 @@ export default function DeliveryCard({
     setActiveAction(null);
     setReason('');
     setError('');
+    setRequestedCount(2);
   };
 
   const handleApprove = async () => {
@@ -105,9 +107,39 @@ export default function DeliveryCard({
       try {
         await onRevision(delivery.id, reason.trim());
         resetForm();
+      } catch (err) {
+        if (err.response?.data?.errorCode === 'REVISION_LIMIT_EXCEEDED' || String(err.response?.data?.message || '').toLowerCase().includes('limit')) {
+          setError('Revision limit exceeded. You must request additional revisions from the freelancer.');
+          setActiveAction('ADDITIONAL_REVISION');
+        } else {
+          setError(err.response?.data?.message || err.message || 'Failed to request revision.');
+        }
       } finally {
         setIsSubmitting(false);
       }
+    }
+  };
+
+  const handleAdditionalRevisionSubmit = async () => {
+    if (!reason.trim()) {
+      setError('Please enter a reason for the additional revisions request.');
+      return;
+    }
+    setError('');
+    setIsSubmitting(true);
+    try {
+      await contractsService.requestAdditionalRevisions({
+        deliveryId: delivery.id,
+        requestedCount: Number(requestedCount),
+        reason: reason.trim()
+      });
+      toast.success('Additional revisions requested successfully!');
+      resetForm();
+      if (onRefresh) onRefresh();
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to request additional revisions.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -208,6 +240,74 @@ export default function DeliveryCard({
           attachments={delivery.attachments} 
           onDownload={onDownloadAttachment} 
         />
+
+        {/* Revision & Additional Requests Log */}
+        {((delivery.revisionRequests && delivery.revisionRequests.length > 0) || delivery.revisionRequest || (delivery.additionalRevisionRequests && delivery.additionalRevisionRequests.length > 0)) && (
+          <div className="mt-5 pt-4 border-t border-gray-100 space-y-3">
+            <span className="block text-[11px] font-bold text-gray-450 uppercase tracking-wider">
+              Revision & Additional Requests Log
+            </span>
+            <div className="space-y-3">
+              {/* Revision Requests */}
+              {Array.isArray(delivery.revisionRequests) ? (
+                delivery.revisionRequests.map((rev, index) => (
+                  <div key={rev.id || index} className="p-3 bg-amber-50/40 border border-amber-100 rounded-xl text-xs space-y-1.5 text-left">
+                    <div className="flex justify-between items-center text-amber-800 font-semibold">
+                      <span>Revision #{index + 1}</span>
+                      <span className="text-[10px] bg-amber-105/60 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {rev.status || 'Pending'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">{rev.reason}</p>
+                    {rev.requestedAt && (
+                      <span className="block text-[10px] text-gray-400">
+                        Requested: {new Date(rev.requestedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                ))
+              ) : (
+                delivery.revisionRequest && (
+                  <div className="p-3 bg-amber-50/40 border border-amber-100 rounded-xl text-xs space-y-1.5 text-left">
+                    <div className="flex justify-between items-center text-amber-800 font-semibold">
+                      <span>Revision Request</span>
+                      <span className="text-[10px] bg-amber-105/60 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        {delivery.revisionRequest.status || 'Pending'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed font-medium">{delivery.revisionRequest.reason}</p>
+                    {delivery.revisionRequest.requestedAt && (
+                      <span className="block text-[10px] text-gray-400">
+                        Requested: {new Date(delivery.revisionRequest.requestedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                )
+              )}
+
+              {/* Additional Revision Requests */}
+              {Array.isArray(delivery.additionalRevisionRequests) && delivery.additionalRevisionRequests.map((req, idx) => (
+                <div key={req.id || idx} className="p-3 bg-indigo-50/40 border border-indigo-100 rounded-xl text-xs space-y-1.5 text-left">
+                  <div className="flex justify-between items-center text-indigo-800 font-semibold">
+                    <span>Requested Additional Revisions (+{req.requestedCount})</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                      req.status === 'Approved' || req.status === 'Accepted' ? 'bg-emerald-105 text-emerald-800' :
+                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-105 text-rose-800' : 'bg-indigo-105 text-indigo-800'
+                    }`}>
+                      {req.status || 'Pending'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 leading-relaxed font-medium">{req.reason}</p>
+                  {req.requestedAt && (
+                    <span className="block text-[10px] text-gray-400">
+                      Requested: {new Date(req.requestedAt).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action Area for Client (Pending items only) */}
@@ -254,6 +354,59 @@ export default function DeliveryCard({
                 <Sparkles className="h-4 w-4 mr-1.5 text-slate-500 animate-pulse" />
                 {'Request Specialist Review'}
               </button>
+            </div>
+          ) : activeAction === 'ADDITIONAL_REVISION' ? (
+            <div className="p-4 rounded-lg border bg-indigo-50/50 border-indigo-100 space-y-3">
+              <label className="block text-xs sm:text-sm font-semibold text-indigo-900">
+                Request Additional Revisions:
+              </label>
+              
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-indigo-800 font-medium">Revisions Count:</span>
+                <select
+                  value={requestedCount}
+                  onChange={(e) => setRequestedCount(Number(e.target.value))}
+                  disabled={isSubmitting}
+                  className="rounded-lg border-indigo-200 shadow-sm p-1.5 text-xs bg-white outline-none border"
+                >
+                  <option value={1}>1 Revision</option>
+                  <option value={2}>2 Revisions</option>
+                  <option value={3}>3 Revisions</option>
+                  <option value={5}>5 Revisions</option>
+                </select>
+              </div>
+
+              <textarea
+                rows={3}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full rounded-lg border-indigo-200 shadow-sm p-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 border bg-white outline-none"
+                placeholder="State the reason why you need additional revisions..."
+              />
+              
+              {error && <p className="text-xs text-rose-600 font-medium">{error}</p>}
+
+              <div className="flex justify-end gap-2 text-xs sm:text-sm">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  disabled={isSubmitting}
+                  className="px-3 py-1.5 font-semibold text-gray-650 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                >
+                  {'Cancel'}
+                </button>
+                
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={handleAdditionalRevisionSubmit}
+                  className="px-4 py-1.5 font-semibold text-white rounded-lg transition inline-flex items-center bg-indigo-600 hover:bg-indigo-700"
+                >
+                  {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
+                  {'Submit Request'}
+                </button>
+              </div>
             </div>
           ) : (
             <div className={`p-4 rounded-lg border ${activeAction === 'DISPUTE' ? 'bg-rose-50/50 border-rose-100' : 'bg-gray-100/50 border-gray-200'} space-y-3`}>

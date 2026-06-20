@@ -58,26 +58,6 @@ export default function StepScope({ jobData, patch, toggleExperience }) {
           </div>
         </div>
 
-        {/* Duration */}
-        <div className="pj-group">
-          <label className="pj-label">How long will your work take?</label>
-          <div className="pj-radio-group">
-            {[
-              { value: ">6m",  title: "More than 6 months" },
-              { value: "3-6m", title: "3 to 6 months" },
-              { value: "1-3m", title: "1 to 3 months" },
-            ].map((opt) => (
-              <RadioCard
-                key={opt.value}
-                name="duration"
-                {...opt}
-                compact
-                checked={jobData.duration === opt.value}
-                onChange={(v) => patch({ duration: v })}
-              />
-            ))}
-          </div>
-        </div>
 
         {/* Experience */}
         <div className="pj-group">

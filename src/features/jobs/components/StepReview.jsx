@@ -6,11 +6,6 @@
  * No BE call needed — assembled from local state.
  */
 
-const DURATION_MAP = {
-  ">6m":  "More than 6 months",
-  "3-6m": "3 to 6 months",
-  "1-3m": "1 to 3 months",
-};
 
 function capitalize(str) {
   if (!str) return "";
@@ -53,10 +48,7 @@ export default function StepReview({ jobData }) {
             <p className="pj-review-label">Project Scale</p>
             <p className="pj-review-value">{capitalize(jobData.scopeSize)}</p>
           </div>
-          <div>
-            <p className="pj-review-label">Duration</p>
-            <p className="pj-review-value">{DURATION_MAP[jobData.duration] || jobData.duration}</p>
-          </div>
+
           <div>
             <p className="pj-review-label">Experience Level</p>
             <p className="pj-review-value">{jobData.experience.map(capitalize).join(", ") || "Not specified"}</p>

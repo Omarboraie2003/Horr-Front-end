@@ -37,5 +37,9 @@ export const contractsService = {
   requestSpecialistReview: async (contractId, deliveryId, payload) => {
     const res = await apiClient.post(`/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`, payload);
     return res.data?.data ?? res.data;
+  },
+  requestAdditionalRevisions: async (payload) => {
+    const res = await apiClient.post(ENDPOINTS.REVISIONS.REQUEST_ADDITIONAL, payload);
+    return res.data?.data ?? res.data;
   }
 };

@@ -88,6 +88,20 @@ export const getWalletBalance = async () => {
   return response.data;
 };
 
+export const submitDepositRequest = async (formData) => {
+  const response = await apiClient.post('/Billing/deposit-requests', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
+
+export const getMyDepositRequests = async (page = 1, pageSize = 10) => {
+  const response = await apiClient.get('/Billing/deposit-requests/my-requests', {
+    params: { page, pageSize }
+  });
+  return response.data?.data || response.data;
+};
+
 export const addPaymentMethod = async (paymentData) => {
   const response = await apiClient.post(ENDPOINTS.USER_PROFILE.PAYMENT_METHOD, paymentData);
   return response.data;

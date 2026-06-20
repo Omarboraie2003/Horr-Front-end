@@ -227,27 +227,6 @@ export default function SignUpPage() {
             Sign In
           </Link>
         </p>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-5">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-[12px] text-gray-400 font-medium whitespace-nowrap">
-            Or continue with
-          </span>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
-
-        {/* Social Buttons */}
-        <div className="flex gap-3">
-          <button className="flex-1 flex items-center justify-center gap-2 py-[10px] rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[13px] font-semibold hover:border-[#a8853a] hover:bg-gray-50 transition-all duration-200 shadow-sm">
-            <GoogleIcon />
-            Continue with Google
-          </button>
-          <button className="flex-1 flex items-center justify-center gap-2 py-[10px] rounded-[8px] border border-gray-200 bg-white text-[#1a2332] text-[13px] font-semibold hover:border-[#a8853a] hover:bg-gray-50 transition-all duration-200 shadow-sm">
-            <MicrosoftIcon />
-            Continue with Microsoft
-          </button>
-        </div>
       </div>
     </>
   );

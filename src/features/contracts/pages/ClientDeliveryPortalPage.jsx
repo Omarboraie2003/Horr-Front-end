@@ -49,6 +49,7 @@ export default function ClientDeliveryPortalPage() {
       refetchDeliveries();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Failed to request revision.');
+      throw err;
     }
   };
 
