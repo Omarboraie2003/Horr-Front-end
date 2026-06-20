@@ -49,6 +49,10 @@ export function mapFreelancerDetails(profile = {}, meta = {}) {
     isVerified: Boolean(profile.isVerified),
     isSaved: Boolean(meta.isSaved),
     trustScore: Number(profile.trustScore ?? 0),
+    averageRating: Number(profile.averageRating ?? 0),
+    totalReviews: Number(profile.totalReviews ?? 0),
+    jobSuccessPercentage: Number(profile.jobSuccessPercentage ?? 100),
+    reviews: Array.isArray(profile.reviews) ? profile.reviews : [],
     experienceLevel:
       EXPERIENCE_LEVELS[profile.experienceLevel] ||
       (profile.experienceLevel != null ? String(profile.experienceLevel) : ""),

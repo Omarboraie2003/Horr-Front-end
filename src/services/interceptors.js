@@ -32,7 +32,10 @@ const getErrorMessage = (error) => {
     
     const errs = data.errors || data.Errors;
     if (errs && Array.isArray(errs) && errs.length > 0) {
-      parts.push(errs.join(" "));
+      const joinedErrs = errs.join(" ");
+      if (msg !== joinedErrs && (!msg || !msg.includes(joinedErrs))) {
+        parts.push(joinedErrs);
+      }
       errorsList = errs;
     } else if (typeof errs === "object" && errs !== null) {
       const validationErrors = Object.entries(errs)

@@ -35,7 +35,7 @@ export const contractsService = {
     return res.data?.data ?? res.data;
   },
   requestSpecialistReview: async (contractId, deliveryId, payload) => {
-    const res = await apiClient.post(`/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`, payload);
+    const res = await apiClient.post(ENDPOINTS.DELIVERIES.SUBMIT_SPECIALIST_REVIEW(contractId, deliveryId), payload);
     return res.data?.data ?? res.data;
   },
   requestAdditionalRevisions: async (payload) => {
@@ -43,7 +43,7 @@ export const contractsService = {
     return res.data?.data ?? res.data;
   },
   downloadReceipt: async (requestId) => {
-    const res = await apiClient.get(`/api/billing/deposit-requests/${requestId}/receipt`, { responseType: 'blob' });
+    const res = await apiClient.get(ENDPOINTS.BILLING.DOWNLOAD_RECEIPT(requestId), { responseType: 'blob' });
     return res.data?.data ?? res.data;
   }
 };

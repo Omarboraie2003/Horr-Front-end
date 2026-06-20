@@ -71,7 +71,11 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       const userRole = user.role;
-      if (userRole === "Client" || userRole === "client") {
+      const isClient = Array.isArray(userRole)
+        ? userRole.some(r => String(r).toLowerCase() === 'client')
+        : String(userRole || '').toLowerCase() === 'client';
+
+      if (isClient) {
         navigate("/client/dashboard", { replace: true });
       } else if (userRole) {
         const currentPort = window.location.port;
@@ -117,8 +121,11 @@ export default function LoginPage() {
 
       const decoded = parseJwt(response);
       const userRole = decoded?.role;
+      const isClient = Array.isArray(userRole)
+        ? userRole.some(r => String(r).toLowerCase() === 'client')
+        : String(userRole || '').toLowerCase() === 'client';
 
-      if (userRole === "Client" || userRole === "client") {
+      if (isClient) {
         // Update Redux state immediately
         await dispatch(fetchMe());
         navigate("/client/dashboard");

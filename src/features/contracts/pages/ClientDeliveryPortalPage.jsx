@@ -221,23 +221,23 @@ export default function ClientDeliveryPortalPage() {
           )}
 
           {/* Revisions Info / Tracker */}
-          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 shadow-sm">
-            <div className="flex items-center gap-2 text-indigo-800 mb-2">
-              <RefreshCcw className="h-5 w-5" />
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center gap-2 text-slate-800 mb-2">
+              <RefreshCcw className="h-5 w-5 text-amber-500" />
               <h3 className="font-semibold text-sm uppercase tracking-wide">Max Revisions Tracker</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex justify-between items-center text-xs text-indigo-700">
+              <div className="flex justify-between items-center text-xs text-slate-700">
                 <span>Total Allowed:</span>
                 <span className="font-bold">{maxRevisions}</span>
               </div>
-              <div className="flex justify-between items-center text-xs text-indigo-700">
+              <div className="flex justify-between items-center text-xs text-slate-700">
                 <span>Used Revisions:</span>
                 <span className="font-bold text-amber-700">{totalRevisionsRequested}</span>
               </div>
-              <div className="flex justify-between items-center text-xs text-indigo-700 border-t border-indigo-200 pt-2 font-semibold">
+              <div className="flex justify-between items-center text-xs text-slate-700 border-t border-slate-200 pt-2 font-semibold">
                 <span>Remaining:</span>
-                <span className={`text-sm ${revisionsRemaining === 0 ? 'text-rose-600 font-extrabold' : 'text-indigo-800 font-bold'}`}>
+                <span className={`text-sm ${revisionsRemaining === 0 ? 'text-rose-600 font-extrabold' : 'text-slate-800 font-bold'}`}>
                   {revisionsRemaining} allowed
                 </span>
               </div>
@@ -249,7 +249,7 @@ export default function ClientDeliveryPortalPage() {
                     setRequestedCount(2);
                     setIsAdditionalModalOpen(true);
                   }}
-                  className="w-full mt-2 inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition animate-in fade-in duration-200"
+                  className="w-full mt-2 inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg text-white bg-slate-900 hover:bg-slate-800 shadow-sm transition animate-in fade-in duration-200"
                 >
                   Request Additional Revisions
                 </button>

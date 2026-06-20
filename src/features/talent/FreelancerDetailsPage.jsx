@@ -17,6 +17,7 @@ import FreelancerLanguagesCard from "./components/FreelancerLanguagesCard";
 import FreelancerEducationCard from "./components/FreelancerEducationCard";
 import FreelancerEmploymentCard from "./components/FreelancerEmploymentCard";
 import FreelancerPortfolioCard from "./components/FreelancerPortfolioCard";
+import FreelancerReviewsCard from "./components/FreelancerReviewsCard";
 import FreelancerDetailsSkeleton from "./components/FreelancerDetailsSkeleton";
 import "./styles/freelancerDetails.css";
 
@@ -267,6 +268,7 @@ export default function FreelancerDetailsPage() {
               formatExperience={freelancer.formatExperience}
             />
             <FreelancerPortfolioCard portfolio={freelancer.portfolio} />
+            <FreelancerReviewsCard reviews={freelancer.reviews} />
           </div>
         </div>
       </div>

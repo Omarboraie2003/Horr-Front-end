@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 
 export default function FreelancerHeaderCard({
   freelancer,
@@ -6,7 +6,7 @@ export default function FreelancerHeaderCard({
   onInvite,
 }) {
   const stats = [
-    { value: `${freelancer.trustScore}%`, label: "Job Success" },
+    { value: `${freelancer.jobSuccessPercentage ?? 100}%`, label: "Job Success" },
     { value: freelancer.totalEarnings, label: "Total Earnings" },
     { value: String(freelancer.totalJobs), label: "Jobs Completed" },
     { value: String(freelancer.totalHours), label: "Hours Worked" },
@@ -47,6 +47,26 @@ export default function FreelancerHeaderCard({
               <p className="fd-subtitle">
                 {freelancer.locationLabel || "Location not provided"}
               </p>
+              {freelancer.totalReviews > 0 ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.4rem" }}>
+                  <div style={{ display: "flex", gap: "2px" }}>
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        style={{
+                          color: i <= freelancer.averageRating ? "var(--fd-gold)" : "#e2e8f0",
+                          fill: i <= freelancer.averageRating ? "var(--fd-gold)" : (i - 0.5 <= freelancer.averageRating ? "var(--fd-gold)" : "none"),
+                          opacity: i - 0.5 <= freelancer.averageRating && i > freelancer.averageRating ? 0.5 : 1
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--fd-text-muted)" }}>
+                    {freelancer.averageRating.toFixed(1)} ({freelancer.totalReviews} reviews)
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             <div className="fd-header-actions">

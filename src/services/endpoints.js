@@ -19,6 +19,7 @@ export const ENDPOINTS = {
     WALLET_BALANCE: '/Billing/wallet-balance',
     DEPOSIT_REQUESTS: '/Billing/deposit-requests',
     MY_DEPOSIT_REQUESTS: '/Billing/deposit-requests/my-requests',
+    DOWNLOAD_RECEIPT: (requestId) => `/Billing/deposit-requests/${requestId}/receipt`,
   },
   AUTH: {
     LOGIN: '/Auth/login',
@@ -75,6 +76,7 @@ export const ENDPOINTS = {
     GET_BY_CONTRACT: '/deliveries',
     APPROVE: (id) => `/deliveries/${id}/approve`,
     REVISION: (id) => `/deliveries/${id}/revision`,
+    SUBMIT_SPECIALIST_REVIEW: (contractId, deliveryId) => `/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`,
     DISPUTE: (id) => `/deliveries/${id}/dispute`,
     DOWNLOAD: (id) => `/deliveries/attachments/${id}/download`,
   },

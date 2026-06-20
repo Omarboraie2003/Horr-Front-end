@@ -60,7 +60,7 @@ function transformTalent(apiTalent) {
     isSaved: apiTalent.isSaved || false,
     badge: null, // TODO: Determine badge logic if needed
     title: apiTalent.title || "Freelancer",
-    jobSuccess: apiTalent.trustScore || 0,
+    jobSuccess: apiTalent.jobSuccessPercentage ?? 100,
     earned: null, // Not provided in API, removed per requirements
     rating: apiTalent.averageRating || 0,
     ratingCount: apiTalent.totalReviews || 0,

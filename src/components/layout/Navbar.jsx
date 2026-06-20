@@ -285,7 +285,6 @@ export default function Navbar({ role = "client", user = null }) {
                 <Link className="horr-dd-item" to="/client/search-talent">Search for talent</Link>
                 <Link className="horr-dd-item" to="/client/hired-talent">Talent you've hired</Link>
                 <Link className="horr-dd-item" to="/client/saved-talent">Talent you've saved</Link>
-                <Link className="horr-dd-item" to="/client/direct-contracts">Direct Contracts</Link>
               </div>
             </div>
           )}

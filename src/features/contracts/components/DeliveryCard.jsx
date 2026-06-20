@@ -288,12 +288,12 @@ export default function DeliveryCard({
 
               {/* Additional Revision Requests */}
               {Array.isArray(delivery.additionalRevisionRequests) && delivery.additionalRevisionRequests.map((req, idx) => (
-                <div key={req.id || idx} className="p-3 bg-indigo-50/40 border border-indigo-100 rounded-xl text-xs space-y-1.5 text-left">
-                  <div className="flex justify-between items-center text-indigo-800 font-semibold">
+                <div key={req.id || idx} className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1.5 text-left">
+                  <div className="flex justify-between items-center text-slate-800 font-semibold">
                     <span>Requested Additional Revisions (+{req.requestedCount})</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                      req.status === 'Approved' || req.status === 'Accepted' ? 'bg-emerald-105 text-emerald-800' :
-                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-105 text-rose-800' : 'bg-indigo-105 text-indigo-800'
+                      req.status === 'Approved' || req.status === 'Accepted' ? 'bg-emerald-100 text-emerald-800' :
+                      req.status === 'Rejected' || req.status === 'Declined' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-800'
                     }`}>
                       {req.status || 'Pending'}
                     </span>
@@ -306,6 +306,68 @@ export default function DeliveryCard({
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Specialist Review Section */}
+        {delivery.specialistReview && (
+          <div className="mt-5 pt-4 border-t border-gray-100 space-y-3">
+            <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+              Specialist Review Status & Feedback
+            </span>
+            <div className={`p-4 rounded-xl border text-sm space-y-3 text-left ${
+              delivery.specialistReview.status === 'Completed'
+                ? delivery.specialistReview.verdict === 'Satisfactory'
+                  ? 'bg-emerald-50/40 border-emerald-100 text-emerald-900'
+                  : 'bg-rose-50/40 border-rose-100 text-rose-900'
+                : 'bg-blue-50/40 border-blue-100 text-blue-900'
+            }`}>
+              <div className="flex justify-between items-center font-semibold">
+                <span className={`flex items-center gap-1.5 ${
+                  delivery.specialistReview.status === 'Completed'
+                    ? delivery.specialistReview.verdict === 'Satisfactory'
+                      ? 'text-emerald-800'
+                      : 'text-rose-800'
+                    : 'text-blue-800'
+                }`}>
+                  {delivery.specialistReview.reviewerType === 'AI' ? 'AI Assistant Review' : 'Human Specialist Review'}
+                </span>
+                <span className={`text-[10px] px-2.5 py-0.5 rounded-full uppercase font-bold tracking-wider ${
+                  delivery.specialistReview.status === 'Completed'
+                    ? delivery.specialistReview.verdict === 'Satisfactory'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-rose-100 text-rose-800'
+                    : 'bg-blue-100 text-blue-800'
+                }`}>
+                  {delivery.specialistReview.status === 'Completed'
+                    ? delivery.specialistReview.verdict
+                    : delivery.specialistReview.status === 'InProgress' ? 'In Progress' : delivery.specialistReview.status}
+                </span>
+              </div>
+              
+              {delivery.specialistReview.requirementsSummary && (
+                <div className="text-xs text-gray-600 border-l-2 border-gray-300 pl-3 py-0.5 mt-1">
+                  <span className="font-bold block text-[10px] text-gray-400 uppercase mb-0.5">Evaluation Scope:</span>
+                  {delivery.specialistReview.requirementsSummary}
+                </div>
+              )}
+
+              {delivery.specialistReview.status === 'Completed' && delivery.specialistReview.reviewNote && (
+                <div className="mt-2 space-y-1">
+                  <span className="font-bold block text-[10px] text-gray-400 uppercase">Review Notes:</span>
+                  <p className="text-gray-700 leading-relaxed font-medium whitespace-pre-wrap text-xs bg-white/60 p-3 rounded-lg border border-gray-100">
+                    {delivery.specialistReview.reviewNote}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center text-[10px] text-gray-400 mt-2 pt-1 border-t border-gray-100/50">
+                <span>Requested: {new Date(delivery.specialistReview.requestedAt).toLocaleString()}</span>
+                {delivery.specialistReview.completedAt && (
+                  <span>Completed: {new Date(delivery.specialistReview.completedAt).toLocaleString()}</span>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -358,18 +420,18 @@ export default function DeliveryCard({
               </button>
             </div>
           ) : activeAction === 'ADDITIONAL_REVISION' ? (
-            <div className="p-4 rounded-lg border bg-indigo-50/50 border-indigo-100 space-y-3">
-              <label className="block text-xs sm:text-sm font-semibold text-indigo-900">
+            <div className="p-4 rounded-lg border bg-slate-50 border-slate-200 space-y-3">
+              <label className="block text-xs sm:text-sm font-semibold text-slate-800">
                 Request Additional Revisions:
               </label>
               
               <div className="flex items-center gap-3">
-                <span className="text-xs text-indigo-800 font-medium">Revisions Count:</span>
+                <span className="text-xs text-slate-700 font-medium">Revisions Count:</span>
                 <select
                   value={requestedCount}
                   onChange={(e) => setRequestedCount(Number(e.target.value))}
                   disabled={isSubmitting}
-                  className="rounded-lg border-indigo-200 shadow-sm p-1.5 text-xs bg-white outline-none border"
+                  className="rounded-lg border-slate-200 shadow-sm p-1.5 text-xs bg-white outline-none border"
                 >
                   <option value={1}>1 Revision</option>
                   <option value={2}>2 Revisions</option>
@@ -383,7 +445,7 @@ export default function DeliveryCard({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 disabled={isSubmitting}
-                className="w-full rounded-lg border-indigo-200 shadow-sm p-3 text-sm focus:border-indigo-500 focus:ring-indigo-500 border bg-white outline-none"
+                className="w-full rounded-lg border-slate-200 shadow-sm p-3 text-sm focus:border-slate-800 focus:ring-slate-800 border bg-white outline-none"
                 placeholder="State the reason why you need additional revisions..."
               />
               
@@ -403,7 +465,7 @@ export default function DeliveryCard({
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleAdditionalRevisionSubmit}
-                  className="px-4 py-1.5 font-semibold text-white rounded-lg transition inline-flex items-center bg-indigo-600 hover:bg-indigo-700"
+                  className="px-4 py-1.5 font-semibold text-white rounded-lg transition inline-flex items-center bg-slate-900 hover:bg-slate-800"
                 >
                   {isSubmitting && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />}
                   {'Submit Request'}

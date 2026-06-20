@@ -59,7 +59,7 @@ function transformSavedTalent(apiTalent) {
     isSaved: true, // Since it is in saved talents list
     badge: null,
     title: apiTalent.title || "Freelancer",
-    jobSuccess: apiTalent.trustScore || 0,
+    jobSuccess: apiTalent.jobSuccessPercentage ?? 100,
     earned: null,
     rating: apiTalent.averageRating || 0,
     ratingCount: apiTalent.totalReviews || 0,
