@@ -257,7 +257,7 @@ function JobCard({ job, onEdit, onDelete }) {
         <div className="cd-job-info">
           <h3 className="cd-job-title">{job.title}</h3>
           <p className="cd-job-meta">Created {dateLabel}</p>
-          <Link className="cd-btn-open" to={`/client/job-proposals?jobId=${job.id}`}>
+          <Link className="cd-btn-open" to={`/client/manage-job/${job.id}`}>
             Open job post ↗
           </Link>
         </div>

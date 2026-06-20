@@ -146,3 +146,9 @@ export const createOffer = async ({ freelancerId, proposalId, jobPostId, agreedR
   });
   return response.data;
 };
+
+export const getJobDetails = async (jobId) => {
+  const url = ENDPOINTS.JOBS.DETAILS.replace('{id}', jobId);
+  const response = await apiClient.get(url);
+  return response.data;
+};

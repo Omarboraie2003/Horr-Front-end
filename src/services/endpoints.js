@@ -30,9 +30,10 @@ export const ENDPOINTS = {
     LIST: '/Jobs/jobs',
     UPDATE: '/Jobs/update-job',
     DELETE: '/Jobs/delete-job',
-    CLIENT_PROPOSALS: '/client/proposals', 
+    CLIENT_PROPOSALS: '/client/proposals',
+    DETAILS: '/Jobs/jobs/{id}',
   },
-  
+
   CATEGORIES: '/Categories',
   SKILLS: '/Skills',
 
@@ -49,9 +50,9 @@ export const ENDPOINTS = {
   },
 
   PROPOSALS: {
-  REJECT: '/Proposals/{id}/reject',
-  CREATE_OFFER: '/Contracts/create-offer',
-},
+    REJECT: '/Proposals/{id}/reject',
+    CREATE_OFFER: '/Contracts/create-offer',
+  },
 
 
 };

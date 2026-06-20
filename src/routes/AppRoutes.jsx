@@ -11,6 +11,7 @@ import SearchTalentPage from '../features/talent/SearchTalentPage';
 import SavedTalentPage from '../features/talent/SavedTalentPage';
 import FreelancerDetailsPage from '../features/talent/FreelancerDetailsPage';
 import ProtectedRoute from '../components/ProtectedRoute';
+import ManageJobPage from '../features/jobs/pages/ManageJobPage';
 
 const AppRoutes = () => {
   return (
@@ -29,8 +30,9 @@ const AppRoutes = () => {
           <Route path="/client/search-talent" element={<SearchTalentPage />} />
           <Route path="/client/saved-talent" element={<SavedTalentPage />} />
           <Route path="/client/freelancer/:id" element={<FreelancerDetailsPage />} />
-          <Route path="/client/job-proposals" element={<JobProposalsPage />} />  
+          <Route path="/client/job-proposals" element={<JobProposalsPage />} />
           <Route path="/client/SearchTalentPage" element={<Navigate to="/client/search-talent" replace />} />
+          <Route path="/client/manage-job/:id" element={<ManageJobPage />} />
         </Route>
       </Route>
 
