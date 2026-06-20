@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Clock, CheckCircle2, Archive } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, Archive, RefreshCcw } from 'lucide-react';
 import { useContractQuery, useContractDeliveriesQuery, useDownloadAttachmentMutation } from '../../../hooks/useContractDelivery';
 import { contractsService } from '../../../services/contractsService';
 import DeliveryHistory from '../components/DeliveryHistory';
@@ -165,6 +165,17 @@ export default function ClientDeliveryPortalPage() {
               </p>
             </div>
           )}
+
+          {/* Revisions Info */}
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center gap-2 text-indigo-800 mb-2">
+              <RefreshCcw className="h-5 w-5" />
+              <h3 className="font-semibold text-sm uppercase tracking-wide">Max Revisions</h3>
+            </div>
+            <p className="text-indigo-700 text-sm leading-relaxed">
+              <span className="font-bold">{contract?.maxRevisions ?? contract?.MaxRevisions ?? contract?.revisionsIncluded ?? contract?.numberOfRevisions ?? 'Unlimited'}</span> revisions allowed for this contract.
+            </p>
+          </div>
         </div>
       </div>
     </div>
