@@ -179,3 +179,9 @@ export const revokeOffer = async (contractId) => {
   const response = await apiClient.post(ENDPOINTS.CONTRACTS.REVOKE_OFFER(contractId));
   return response.data;
 };
+
+export const getJobDetails = async (jobId) => {
+  const url = ENDPOINTS.JOBS.DETAILS.replace('{id}', jobId);
+  const response = await apiClient.get(url);
+  return response.data;
+};
