@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { ArrowLeft, Clock, CheckCircle2, Archive, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle2, Archive, RefreshCcw, X, Loader2 } from 'lucide-react';
 import { useContractQuery, useContractDeliveriesQuery, useDownloadAttachmentMutation } from '../../../hooks/useContractDelivery';
 import { contractsService } from '../../../services/contractsService';
 import DeliveryHistory from '../components/DeliveryHistory';
@@ -11,6 +12,12 @@ export default function ClientDeliveryPortalPage() {
   const { data: contract, loading: contractLoading, refetch: refetchContract } = useContractQuery(contractId);
   const { data: deliveries, loading: deliveriesLoading, refetch: refetchDeliveries } = useContractDeliveriesQuery(contractId);
   const { mutate: downloadAttachment } = useDownloadAttachmentMutation();
+
+  const [isAdditionalModalOpen, setIsAdditionalModalOpen] = useState(false);
+  const [requestedCount, setRequestedCount] = useState(2);
+  const [additionalReason, setAdditionalReason] = useState('');
+  const [additionalError, setAdditionalError] = useState('');
+  const [isSubmittingAdditional, setIsSubmittingAdditional] = useState(false);
 
   const isLoading = contractLoading || deliveriesLoading;
 
@@ -28,6 +35,16 @@ export default function ClientDeliveryPortalPage() {
   });
   const isPendingPaused = pendingDelivery?.isPaused || pendingDelivery?.IsPaused;
   const pendingPauseReason = pendingDelivery?.pauseReason || pendingDelivery?.PauseReason;
+
+  const sortedDeliveriesForId = deliveries ? [...deliveries].sort((a, b) => {
+    const dateB = b.submittedAt || b.SubmittedAt || b.submissionDate || b.date;
+    const dateA = a.submittedAt || a.SubmittedAt || a.submissionDate || a.date;
+    return new Date(dateB).getTime() - new Date(dateA).getTime();
+  }) : [];
+  const latestDeliveryId = pendingDelivery?.id || sortedDeliveriesForId[0]?.id;
+
+  const maxRevisionsVal = contract?.maxRevisions ?? contract?.MaxRevisions ?? contract?.revisionsIncluded ?? contract?.numberOfRevisions;
+  const isZeroRevisions = maxRevisionsVal !== undefined && (String(maxRevisionsVal) === '0' || Number(maxRevisionsVal) === 0);
 
   // Handlers
   const handleApprove = async (deliveryId) => {
@@ -61,6 +78,35 @@ export default function ClientDeliveryPortalPage() {
       refetchDeliveries();
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Failed to open dispute.');
+    }
+  };
+
+  const handleRequestAdditionalRevisions = async () => {
+    if (!additionalReason.trim()) {
+      setAdditionalError('Please enter a reason for requesting additional revisions.');
+      return;
+    }
+    if (!latestDeliveryId) {
+      toast.error('No delivery available to request revisions for.');
+      return;
+    }
+    setAdditionalError('');
+    setIsSubmittingAdditional(true);
+    try {
+      await contractsService.requestAdditionalRevisions({
+        deliveryId: latestDeliveryId,
+        requestedCount: Number(requestedCount),
+        reason: additionalReason.trim()
+      });
+      toast.success('Additional revisions requested successfully!');
+      setIsAdditionalModalOpen(false);
+      setAdditionalReason('');
+      refetchContract();
+      refetchDeliveries();
+    } catch (err) {
+      setAdditionalError(err.response?.data?.message || err.message || 'Failed to request additional revisions.');
+    } finally {
+      setIsSubmittingAdditional(false);
     }
   };
 
@@ -172,12 +218,106 @@ export default function ClientDeliveryPortalPage() {
               <RefreshCcw className="h-5 w-5" />
               <h3 className="font-semibold text-sm uppercase tracking-wide">Max Revisions</h3>
             </div>
-            <p className="text-indigo-700 text-sm leading-relaxed">
-              <span className="font-bold">{contract?.maxRevisions ?? contract?.MaxRevisions ?? contract?.revisionsIncluded ?? contract?.numberOfRevisions ?? 'Unlimited'}</span> revisions allowed for this contract.
-            </p>
+            {isZeroRevisions ? (
+              <div className="space-y-3">
+                <p className="text-indigo-700 text-sm leading-relaxed">
+                  No revisions remaining.
+                </p>
+                {!isCompleted && latestDeliveryId && (
+                  <button
+                    onClick={() => {
+                      setAdditionalReason('');
+                      setAdditionalError('');
+                      setRequestedCount(2);
+                      setIsAdditionalModalOpen(true);
+                    }}
+                    className="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition animate-in fade-in duration-200"
+                  >
+                    Request Additional Revisions
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p className="text-indigo-700 text-sm leading-relaxed">
+                <span className="font-bold">{maxRevisionsVal ?? 'Unlimited'}</span> revisions allowed for this contract.
+              </p>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Request Additional Revisions Modal */}
+      {isAdditionalModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200 text-left">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Request Additional Revisions</h3>
+              <button
+                onClick={() => setIsAdditionalModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-slate-700 font-semibold">Revisions Count:</span>
+                <select
+                  value={requestedCount}
+                  onChange={(e) => setRequestedCount(Number(e.target.value))}
+                  disabled={isSubmittingAdditional}
+                  className="rounded-lg border-slate-200 shadow-sm p-1.5 text-sm bg-white outline-none border"
+                >
+                  <option value={1}>1 Revision</option>
+                  <option value={2}>2 Revisions</option>
+                  <option value={3}>3 Revisions</option>
+                  <option value={5}>5 Revisions</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Reason for Request
+                </label>
+                <textarea
+                  rows={4}
+                  value={additionalReason}
+                  onChange={(e) => setAdditionalReason(e.target.value)}
+                  placeholder="State the reason why you need additional revisions..."
+                  disabled={isSubmittingAdditional}
+                  className="w-full rounded-xl border border-slate-200 shadow-sm p-3 text-sm focus:border-slate-800 focus:ring-slate-800 outline-none resize-none"
+                />
+                {additionalError && (
+                  <p className="text-xs text-rose-600 font-semibold">{additionalError}</p>
+                )}
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAdditionalModalOpen(false)}
+                  className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRequestAdditionalRevisions}
+                  disabled={isSubmittingAdditional}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition disabled:opacity-50 inline-flex items-center gap-1.5"
+                >
+                  {isSubmittingAdditional && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Submit Request
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
