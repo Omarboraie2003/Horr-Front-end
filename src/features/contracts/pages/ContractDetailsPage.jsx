@@ -124,6 +124,10 @@ export default function ContractDetailsPage() {
   const formattedStartDate = started ? new Date(started).toLocaleDateString() : 'N/A';
   const description = contract.description || contract.Description || 'This contract involves the full scope of work as discussed in the proposal. The goal is to deliver high-quality results within the agreed timeline.';
   const review = contract.review || contract.Review || null;
+  const hasPending = deliveries?.some(d => {
+    const s = String(d.status ?? d.Status ?? '').toLowerCase();
+    return s === 'pending' || s === '0';
+  });
 
   return (
     <div style={{ maxWidth: '850px', width: '100%', margin: '0 auto', padding: '2.5rem 3rem', boxSizing: 'border-box' }}>
@@ -174,6 +178,36 @@ export default function ContractDetailsPage() {
             </div>
           </div>
           <div className="header-right header-buttons" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {isActive && hasPending && (
+              <button
+                className="btn-specialist"
+                onClick={() => navigate(`/client/contracts/${id}/deliveries`)}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  border: '1px solid #e0e0e0',
+                  background: '#ffffff',
+                  color: '#555',
+                  fontWeight: '600',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = '#f7f7f5';
+                  e.currentTarget.style.borderColor = '#ccc';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = '#ffffff';
+                  e.currentTarget.style.borderColor = '#e0e0e0';
+                }}
+              >
+                Request Specialist
+              </button>
+            )}
             {isActive && (
               <button
                 className="btn-deliver"

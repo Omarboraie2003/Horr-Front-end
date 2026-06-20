@@ -8,7 +8,8 @@ export default function DeliveryHistory({
   onApprove, 
   onRevision, 
   onDispute, 
-  onDownloadAttachment 
+  onDownloadAttachment,
+  onRefresh
 }) {
   
   if (isLoading) {
@@ -74,6 +75,7 @@ export default function DeliveryHistory({
             onRevision={onRevision}
             onDispute={onDispute}
             onDownloadAttachment={onDownloadAttachment}
+            onRefresh={onRefresh}
           />
         ))}
       </div>

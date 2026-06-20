@@ -33,5 +33,9 @@ export const contractsService = {
   downloadAttachment: async (attachmentId) => {
     const res = await apiClient.get(ENDPOINTS.DELIVERIES.DOWNLOAD(attachmentId), { responseType: 'blob' });
     return res.data?.data ?? res.data;
+  },
+  requestSpecialistReview: async (contractId, deliveryId, payload) => {
+    const res = await apiClient.post(`/api/contracts/${contractId}/deliveries/${deliveryId}/specialist-review`, payload);
+    return res.data?.data ?? res.data;
   }
 };

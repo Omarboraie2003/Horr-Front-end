@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Check, Edit3, ShieldAlert, Loader2, Calendar } from 'lucide-react';
+import { Check, Edit3, ShieldAlert, Loader2, Calendar, Sparkles, User, X, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
+import { contractsService } from '../../../services/contractsService';
 import DeliveryStatusBadge from './DeliveryStatusBadge';
 import DeliveryFilesList from './DeliveryFilesList';
 
@@ -9,13 +11,67 @@ export default function DeliveryCard({
   onApprove, 
   onRevision, 
   onDispute, 
-  onDownloadAttachment 
+  onDownloadAttachment,
+  onRefresh
 }) {
     
   const [activeAction, setActiveAction] = useState(null); // 'REVISION' | 'DISPUTE'
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviewerType, setReviewerType] = useState(null); // 'AI' | 'Human'
+  const [requirements, setRequirements] = useState('');
+  const [requirementsError, setRequirementsError] = useState('');
+  const [aiResult, setAiResult] = useState(null);
+
+  const handleSubmitReviewRequest = async () => {
+    if (requirements.trim().length < 50) {
+      setRequirementsError("Requirements summary must be at least 50 characters.");
+      return;
+    }
+    if (requirements.trim().length > 2000) {
+      setRequirementsError("Requirements summary cannot exceed 2000 characters.");
+      return;
+    }
+    setRequirementsError('');
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        reviewerType: reviewerType === 'AI' ? 'AI' : 'Human',
+        requirementsSummary: requirements.trim()
+      };
+      
+      const response = await contractsService.requestSpecialistReview(
+        delivery.contractId || delivery.ContractId,
+        delivery.id,
+        payload
+      );
+      
+      if (reviewerType === 'AI') {
+        const isFailedAi = response.reviewNote?.includes("failed to produce a valid response") || 
+                            response.verdict === null;
+        
+        if (isFailedAi) {
+          toast.error("AI review is currently unavailable (tokens may have run out). Please request a Human Specialist instead.");
+          setReviewerType('Human');
+        } else {
+          setAiResult(response);
+          toast.success("AI Review Completed successfully!");
+        }
+      } else {
+        toast.success("Human Specialist assigned. Auto-approval is now paused.");
+        setIsReviewModalOpen(false);
+        if (onRefresh) onRefresh();
+      }
+    } catch (err) {
+      const errMsg = err.response?.data?.message || err.message || "Failed to submit review request.";
+      toast.error(errMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const statusStr = String(delivery.status !== undefined ? delivery.status : (delivery.Status !== undefined ? delivery.Status : '')).toLowerCase();
   const isPending = statusStr === 'pending' || statusStr === '0';
@@ -78,6 +134,45 @@ export default function DeliveryCard({
     { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
   );
 
+  const attachmentsList = delivery.attachments || delivery.files || [];
+  const isPaused = delivery.isPaused || delivery.IsPaused;
+
+  const validateAttachmentsForAi = () => {
+    if (attachmentsList.length === 0) {
+      return {
+        valid: false,
+        reason: "AI review requires at least one attachment to analyze."
+      };
+    }
+
+    const allowedExtensions = ['.txt', '.csv', '.pdf', '.doc', '.docx', '.md', '.zip', '.rar', '.7z'];
+    const maxSizeBytes = 50 * 1024 * 1024; // 50MB
+
+    for (const attachment of attachmentsList) {
+      const fileName = attachment.name || attachment.originalFileName || attachment.fileName || '';
+      const extension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+      const sizeBytes = attachment.fileSizeBytes || attachment.size || 0;
+
+      if (!allowedExtensions.includes(extension)) {
+        return {
+          valid: false,
+          reason: `File "${fileName}" has an invalid format. AI review only supports documents (.txt, .csv, .pdf, .doc, .docx, .md) and zip archives (.zip, .rar, .7z).`
+        };
+      }
+
+      if (sizeBytes > maxSizeBytes) {
+        return {
+          valid: false,
+          reason: `File "${fileName}" exceeds the 50MB size limit for AI reviews.`
+        };
+      }
+    }
+
+    return { valid: true };
+  };
+
+  const aiValidation = validateAttachmentsForAi();
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:border-gray-300 transition-all">
       {/* Card Header */}
@@ -91,6 +186,18 @@ export default function DeliveryCard({
 
       {/* Card Body */}
       <div className="p-4 sm:p-5 space-y-4">
+        {isPaused && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3 text-amber-900 text-sm">
+            <ShieldAlert className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold block">Delivery Review Paused</span>
+              <span className="mt-1 block text-xs text-amber-800 leading-relaxed">
+                {delivery.pauseReason || delivery.PauseReason || 'Auto-approval worker is paused while a specialist review is in progress.'}
+              </span>
+            </div>
+          </div>
+        )}
+
         {delivery.deliveryNote && (
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
             {delivery.deliveryNote}
@@ -104,7 +211,7 @@ export default function DeliveryCard({
       </div>
 
       {/* Action Area for Client (Pending items only) */}
-      {isClient && isPending && (
+      {isClient && isPending && !isPaused && (
         <div className="bg-gray-50 border-t border-gray-100 p-4 sm:p-5 space-y-4">
           {!activeAction ? (
             <div className="flex flex-wrap gap-2.5">
@@ -137,6 +244,15 @@ export default function DeliveryCard({
               >
                 <ShieldAlert className="h-4 w-4 mr-1.5 text-rose-500" />
                 {'Open Dispute'}
+              </button>
+
+              <button
+                onClick={() => { setIsReviewModalOpen(true); setReviewerType(null); setRequirements(''); setRequirementsError(''); setAiResult(null); }}
+                disabled={isSubmitting}
+                className="inline-flex items-center justify-center px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-705 bg-white border border-slate-300 hover:bg-slate-50 shadow-sm transition disabled:opacity-50"
+              >
+                <Sparkles className="h-4 w-4 mr-1.5 text-slate-500 animate-pulse" />
+                {'Request Specialist Review'}
               </button>
             </div>
           ) : (
@@ -188,6 +304,179 @@ export default function DeliveryCard({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Review Request Modal */}
+      {isReviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200 text-left">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">Request Delivery Review</h3>
+              <button
+                onClick={() => { setIsReviewModalOpen(false); setAiResult(null); }}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            {!aiResult ? (
+              <div className="p-6 space-y-6">
+                {/* Step 1: Select Type */}
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Choose Reviewer Type
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* AI Option */}
+                    <button
+                      type="button"
+                      onClick={() => setReviewerType('AI')}
+                      className={`p-4 rounded-xl border text-left flex flex-col justify-between h-36 transition-all ${
+                        reviewerType === 'AI'
+                          ? 'border-emerald-500 bg-emerald-50/20 shadow-sm ring-1 ring-emerald-500'
+                          : 'border-slate-200 hover:bg-slate-50/50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className={`p-2 rounded-lg ${reviewerType === 'AI' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                          <Sparkles className="h-5 w-5" />
+                        </span>
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                          Instant
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-sm">AI Review (Gemini)</h4>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">Get immediate quality feedback.</p>
+                      </div>
+                    </button>
+
+                    {/* Human Specialist Option */}
+                    <button
+                      type="button"
+                      onClick={() => setReviewerType('Human')}
+                      className={`p-4 rounded-xl border text-left flex flex-col justify-between h-36 transition-all ${
+                        reviewerType === 'Human'
+                          ? 'border-blue-500 bg-blue-50/20 shadow-sm ring-1 ring-blue-500'
+                          : 'border-slate-200 hover:bg-slate-50/50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className={`p-2 rounded-lg ${reviewerType === 'Human' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                          <User className="h-5 w-5" />
+                        </span>
+                        <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                          1-3 Days
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-sm">Human Specialist</h4>
+                        <p className="text-xs text-slate-500 mt-1 font-medium">Assigned to a professional reviewer.</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Validation Warnings for AI */}
+                {reviewerType === 'AI' && !aiValidation.valid && (
+                  <div className="bg-rose-50 border border-rose-100 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-rose-800">
+                    <AlertTriangle className="h-4.5 w-4.5 text-rose-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block">AI Review Unavailable</span>
+                      <span className="mt-0.5 block leading-relaxed font-medium">{aiValidation.reason}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Form */}
+                {reviewerType && (reviewerType !== 'AI' || aiValidation.valid) && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex justify-between items-center">
+                      <label htmlFor="requirements-summary" className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Requirements Summary
+                      </label>
+                      <span className={`text-[10px] font-semibold ${requirements.trim().length >= 50 ? 'text-slate-450' : 'text-amber-600'}`}>
+                        {requirements.trim().length}/2000 chars (min 50)
+                      </span>
+                    </div>
+                    <textarea
+                      id="requirements-summary"
+                      rows={4}
+                      value={requirements}
+                      onChange={(e) => setRequirements(e.target.value)}
+                      placeholder={
+                        reviewerType === 'AI'
+                          ? "Specify detailed instructions and criteria. AI requires a thorough summary of requirements to check against."
+                          : "Describe the requirements the specialist should evaluate the delivery against..."
+                      }
+                      className="w-full rounded-xl border border-slate-200 shadow-sm p-3 text-sm focus:border-slate-800 focus:ring-slate-800 outline-none resize-none"
+                    />
+                    {requirementsError && (
+                      <p className="text-xs text-rose-600 font-semibold">{requirementsError}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsReviewModalOpen(false)}
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSubmitReviewRequest}
+                    disabled={isSubmitting || !reviewerType || (reviewerType === 'AI' && !aiValidation.valid)}
+                    className="px-5 py-2 text-sm font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition disabled:opacity-50 inline-flex items-center gap-1.5"
+                  >
+                    {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {reviewerType === 'AI' ? 'Run AI Review' : 'Submit to Specialist'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* AI Result Display Panel */
+              <div className="p-6 space-y-5 animate-in fade-in duration-200">
+                <div className="text-center space-y-2">
+                  <span className={`inline-flex p-3 rounded-full ${aiResult.verdict === 0 || aiResult.verdict === 'Satisfactory' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                    <Sparkles className="h-7 w-7" />
+                  </span>
+                  <h4 className="text-lg font-bold text-slate-850">AI Review Result</h4>
+                  <div className="inline-block">
+                    <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${
+                      aiResult.verdict === 0 || aiResult.verdict === 'Satisfactory'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}>
+                      {aiResult.verdict === 0 || aiResult.verdict === 'Satisfactory' ? 'Satisfactory' : 'Unsatisfactory'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-2">
+                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">AI Reasoning</span>
+                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{aiResult.reviewNote}</p>
+                </div>
+
+                <div className="flex justify-end pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => { setIsReviewModalOpen(false); setAiResult(null); if (onRefresh) onRefresh(); }}
+                    className="px-5 py-2 text-sm font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

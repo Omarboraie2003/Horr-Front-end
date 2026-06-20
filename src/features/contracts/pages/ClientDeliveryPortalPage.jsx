@@ -22,6 +22,12 @@ export default function ClientDeliveryPortalPage() {
     const s = String(d.status ?? d.Status ?? '').toLowerCase();
     return s === 'pending' || s === '0';
   });
+  const pendingDelivery = deliveries?.find(d => {
+    const s = String(d.status ?? d.Status ?? '').toLowerCase();
+    return s === 'pending' || s === '0';
+  });
+  const isPendingPaused = pendingDelivery?.isPaused || pendingDelivery?.IsPaused;
+  const pendingPauseReason = pendingDelivery?.pauseReason || pendingDelivery?.PauseReason;
 
   // Handlers
   const handleApprove = async (deliveryId) => {
@@ -108,6 +114,7 @@ export default function ClientDeliveryPortalPage() {
               onRevision={!isCompleted ? handleRevision : undefined}
               onDispute={!isCompleted ? handleDispute : undefined}
               onDownloadAttachment={(id, name) => downloadAttachment(id, name)}
+              onRefresh={() => { refetchContract(); refetchDeliveries(); }}
             />
           )}
         </div>
@@ -116,19 +123,33 @@ export default function ClientDeliveryPortalPage() {
         <div className="lg:col-span-1 space-y-4">
           {isActive && hasPending && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-3">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-amber-800 mb-2">
-                <Clock className="h-5 w-5" />
-                <h3 className="font-semibold text-sm uppercase tracking-wide">Awaiting your review</h3>
-              </div>
-              <p className="text-amber-700 text-sm leading-relaxed">
-                You have 3 days to approve or request revisions before auto-approval.
-              </p>
+              {isPendingPaused ? (
+                <>
+                  <div className="flex items-center gap-2 text-amber-850 mb-2">
+                    <Clock className="h-5 w-5 text-amber-605" />
+                    <h3 className="font-semibold text-sm uppercase tracking-wide">Review Paused</h3>
+                  </div>
+                  <p className="text-amber-800 text-sm leading-relaxed">
+                    {pendingPauseReason || 'Auto-approval worker is paused while a specialist review is in progress.'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="absolute top-0 right-0 p-3">
+                    <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-amber-800 mb-2">
+                    <Clock className="h-5 w-5" />
+                    <h3 className="font-semibold text-sm uppercase tracking-wide">Awaiting your review</h3>
+                  </div>
+                  <p className="text-amber-700 text-sm leading-relaxed">
+                    You have 3 days to approve or request revisions before auto-approval.
+                  </p>
+                </>
+              )}
             </div>
           )}
 
